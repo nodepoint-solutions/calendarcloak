@@ -8,6 +8,7 @@ final class MockCalendarStore: CalendarStoreProtocol {
     var stubbedEvents: [CalendarEvent] = []
     var createdDrafts: [BusyEventDraft] = []
     var deletedEvents: [CalendarEvent] = []
+    var fetchEventsCallCount = 0
     var requestAccessError: Error? = nil
 
     func requestAccess() async throws {
@@ -23,7 +24,8 @@ final class MockCalendarStore: CalendarStoreProtocol {
     }
 
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent] {
-        stubbedEvents.filter { calendarIDs.contains($0.calendarID) }
+        fetchEventsCallCount += 1
+        return stubbedEvents.filter { calendarIDs.contains($0.calendarID) }
     }
 
     func create(_ draft: BusyEventDraft) throws {

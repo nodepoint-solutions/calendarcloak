@@ -74,5 +74,6 @@ final class SyncEngineTests: XCTestCase {
         engine.deleteAllBusyEvents()
 
         XCTAssertTrue(store.deletedEvents.isEmpty)
+        XCTAssertEqual(store.fetchEventsCallCount, 0, "guard should prevent fetchEvents from being called")
     }
 }
