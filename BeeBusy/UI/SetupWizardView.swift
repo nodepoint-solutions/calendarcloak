@@ -160,6 +160,16 @@ struct SetupWizardView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
             Spacer()
+            let allSelected = selectedIDs.count == allCalendars.count
+            Button(allSelected ? "Select None" : "Select All") {
+                if allSelected {
+                    selectedIDs.removeAll()
+                } else {
+                    selectedIDs = Set(allCalendars.map { $0.calendarIdentifier })
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
             Button("See Preview") {
                 let result = engine.dryRun(calendarIDs: Array(selectedIDs))
                 dryRunOperations = result.operations
