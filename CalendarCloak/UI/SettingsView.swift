@@ -57,6 +57,52 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Event Filters") {
+                Toggle("Include all-day events", isOn: Binding(
+                    get: { settings.includeAllDayEvents },
+                    set: { settings.includeAllDayEvents = $0 }
+                ))
+
+                Toggle("Filter by work hours", isOn: Binding(
+                    get: { settings.workHoursEnabled },
+                    set: { settings.workHoursEnabled = $0 }
+                ))
+
+                if settings.workHoursEnabled {
+                    HStack {
+                        Text("From")
+                        Picker("From", selection: Binding(
+                            get: { settings.workHoursStart },
+                            set: { newStart in
+                                settings.workHoursStart = newStart
+                                if settings.workHoursEnd <= newStart {
+                                    settings.workHoursEnd = newStart + 1
+                                }
+                            }
+                        )) {
+                            ForEach(0..<23) { hour in
+                                Text(hourLabel(hour)).tag(hour)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(width: 110)
+
+                        Text("to")
+
+                        Picker("To", selection: Binding(
+                            get: { settings.workHoursEnd },
+                            set: { settings.workHoursEnd = $0 }
+                        )) {
+                            ForEach((settings.workHoursStart + 1)..<24) { hour in
+                                Text(hourLabel(hour)).tag(hour)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(width: 110)
+                    }
+                }
+            }
+
             Section("General") {
                 Toggle("Launch at login", isOn: Binding(
                     get: { settings.launchAtLogin },
@@ -126,5 +172,15 @@ struct SettingsView: View {
         } catch {
             logger.error("Launch at login failed: \(error)")
         }
+    }
+
+    private func hourLabel(_ hour: Int) -> String {
+        var components = DateComponents()
+        components.hour = hour
+        components.minute = 0
+        let date = Calendar.current.date(from: components) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
     }
 }
