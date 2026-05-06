@@ -30,9 +30,7 @@ final class EventKitStore: CalendarStoreProtocol {
     }
 
     func fetchAllCalendarIDs() -> [String] {
-        store.calendars(for: .event)
-            .filter { $0.allowsContentModifications }
-            .map { $0.calendarIdentifier }
+        fetchCalendars().map { $0.calendarIdentifier }
     }
 
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent] {
