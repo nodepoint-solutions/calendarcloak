@@ -60,6 +60,8 @@ Quit
 
 The `●` indicator is green when active, amber when a recoverable error has occurred, red when calendar access is denied.
 
+"Last sync" shows a relative time (e.g. "2 min ago") after the first successful pass. Before the first pass completes it shows "Last sync: Never".
+
 ---
 
 ## Settings Window
@@ -118,12 +120,12 @@ The engine subscribes to `EKEventStoreChangedNotification`. On every notificatio
 
 ### Source Event Eligibility
 
-A source event is eligible for syncing only if **both** conditions are met:
+A source event is eligible for syncing if **either** of the following is true:
 
-- **No attendees** (self-created event): always eligible  
-- **Has attendees**: find the attendee where `isCurrentUser == true`. Eligible only if `participantStatus == .accepted`. All other statuses (`.tentative`, `.pending`, `.declined`, `.unknown`) are excluded.
+- **No attendees** (self-created event): always eligible
+- **Has attendees**: find the attendee where `isCurrentUser == true`. Eligible only if `participantStatus == .accepted`. All other statuses (`.tentative`, `.pending`, `.declined`, `.unknown`, or no current-user attendee found) result in the event being excluded.
 
-This is a whitelist check. Any status not explicitly `.accepted` results in the event being skipped — including future statuses that EventKit may introduce.
+This is a whitelist check. Any status not explicitly `.accepted` is skipped — including future statuses that EventKit may introduce.
 
 ### Busy Event Format
 
