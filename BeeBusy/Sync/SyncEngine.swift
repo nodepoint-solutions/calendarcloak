@@ -41,6 +41,19 @@ final class SyncEngine {
         logger.info("Removed \(busyToDelete.count) Busy events from \(calendarID)")
     }
 
+    func deleteAllBusyEvents() {
+        let calendarIDs = store.fetchAllCalendarIDs()
+        guard !calendarIDs.isEmpty else { return }
+        let window = lookForwardWindow()
+        let events = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
+        let busyToDelete = events.filter { BusyEventMarker.isBusyEvent($0) }
+        logger.info("Deleting \(busyToDelete.count) Busy events across all calendars")
+        for event in busyToDelete {
+            store.delete(event)
+        }
+        logger.info("Cleanup complete")
+    }
+
     // MARK: - Dry run (read-only — returns plan + events without executing)
 
     func dryRun(calendarIDs: [String]) -> (operations: [ReconciliationOperation], events: [CalendarEvent]) {

@@ -29,6 +29,7 @@
 		D4D0F7B0085E0BF813CF569C /* ReconciliationOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D1E9978F9F07BEFE413D06 /* ReconciliationOperation.swift */; };
 		E59FAD20FDE0A94AF4634FEF /* ReconciliationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5006A20ABFCB9DDE8459E4A3 /* ReconciliationTests.swift */; };
 		FF4FD2AE411293877768D3BC /* EventEligibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572AF1F320C0E629249181AF /* EventEligibilityTests.swift */; };
+		AA1B2C3D4E5F6A7B8C9D0E1F /* SyncEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4E5F6A7B8C9D0E1F2A /* SyncEngineTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		D24A964F9F21DD60CA59B260 /* MockCalendarStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCalendarStore.swift; sourceTree = "<group>"; };
 		D8030018927FE46E70864E56 /* Reconciliation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reconciliation.swift; sourceTree = "<group>"; };
 		E6F1B491EDCFE1E119DDB602 /* BusyEventDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusyEventDraft.swift; sourceTree = "<group>"; };
+		BB2C3D4E5F6A7B8C9D0E1F2A /* SyncEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngineTests.swift; sourceTree = "<group>"; };
 		EFAF1426775437F6F9B0CF6A /* BusyEventMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusyEventMarkerTests.swift; sourceTree = "<group>"; };
 		F74C285AA62F269F53F6FEF5 /* BeeBusy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeeBusy.entitlements; sourceTree = "<group>"; };
 		FBBBC9BD92F5356429DFBBE8 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				572AF1F320C0E629249181AF /* EventEligibilityTests.swift */,
 				42D317484BDC7115A1B4B623 /* LoggerTests.swift */,
 				5006A20ABFCB9DDE8459E4A3 /* ReconciliationTests.swift */,
+				BB2C3D4E5F6A7B8C9D0E1F2A /* SyncEngineTests.swift */,
 				962F70CFE4D69F6CCAF084B8 /* Mocks */,
 			);
 			path = BeeBusyTests;
@@ -294,6 +297,7 @@
 				371E8F1E95FACE3E31E6BB70 /* LoggerTests.swift in Sources */,
 				4B42193C1C75B53FA46A36BD /* MockCalendarStore.swift in Sources */,
 				E59FAD20FDE0A94AF4634FEF /* ReconciliationTests.swift in Sources */,
+				AA1B2C3D4E5F6A7B8C9D0E1F /* SyncEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
