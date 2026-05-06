@@ -17,9 +17,13 @@ final class AppCoordinator {
             do {
                 try await eventKitStore.requestAccess()
                 state.isAccessDenied = false
-                if settings.hasCompletedSetup {
+                // Treat fewer than 2 calendars as unconfigured regardless of hasCompletedSetup —
+                // covers the case where the user closed the wizard without finishing, or removed
+                // all calendars from Settings after initial setup.
+                if settings.hasCompletedSetup && settings.selectedCalendarIDs.count >= 2 {
                     engine.start()
                 } else {
+                    settings.hasCompletedSetup = false  // reset so Activate re-sets it cleanly
                     openSetupWindow(store: eventKitStore, settings: settings, engine: engine)
                 }
             } catch {
