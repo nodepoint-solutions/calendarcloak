@@ -13,9 +13,12 @@ BUILD_FLAGS := \
 	CODE_SIGN_IDENTITY="" \
 	CODE_SIGNING_REQUIRED=NO
 
-.PHONY: build run test clean
+.PHONY: build run test clean generate
 
-build:
+generate:
+	xcodegen generate
+
+build: generate
 	$(XCODEBUILD) build $(BUILD_FLAGS) 2>&1 | tee /tmp/xcodebuild.log | \
 		grep -E '(error:|warning:|BUILD SUCCEEDED|BUILD FAILED)' || true
 	@grep -q 'BUILD SUCCEEDED' /tmp/xcodebuild.log
