@@ -52,9 +52,12 @@ jobs:
 
       - name: Package as DMG
         run: |
+          mkdir -p build/dmg-staging
+          cp -R build/export-arm64/CalendarCloak.app build/dmg-staging/
+          ln -s /Applications build/dmg-staging/Applications
           hdiutil create \
             -volname "CalendarCloak" \
-            -srcfolder build/export-arm64/CalendarCloak.app \
+            -srcfolder build/dmg-staging \
             -ov \
             -format UDZO \
             build/CalendarCloak-${{ steps.version.outputs.version }}-arm64.dmg
