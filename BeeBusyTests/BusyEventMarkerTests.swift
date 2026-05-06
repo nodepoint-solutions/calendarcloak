@@ -38,4 +38,22 @@ final class BusyEventMarkerTests: XCTestCase {
         )
         XCTAssertFalse(BusyEventMarker.isBusyEvent(event))
     }
+
+    func test_isBusyEvent_falseWhenNotesAreUnrelated() {
+        let event = CalendarEvent(
+            id: "id3", calendarID: "cal1", calendarName: "Work",
+            title: "Busy", startDate: Date(), endDate: Date(),
+            isAllDay: false, notes: "Do not disturb", isAccepted: true
+        )
+        XCTAssertFalse(BusyEventMarker.isBusyEvent(event))
+    }
+
+    func test_sourceID_returnsNilForPrefixOnlyNotes() {
+        XCTAssertNil(BusyEventMarker.sourceID(from: "bee-busy:source="))
+    }
+
+    func test_roundTrip_sourceIDSurvivesMarkerEncoding() {
+        let id = "X5A2F-CAFE-001"
+        XCTAssertEqual(BusyEventMarker.sourceID(from: BusyEventMarker.notes(for: id)), id)
+    }
 }
