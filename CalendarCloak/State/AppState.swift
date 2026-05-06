@@ -3,7 +3,7 @@ import Observation
 
 enum UpdateState: Equatable {
     case idle
-    case available(version: String, dmgUrl: URL)
+    case available(version: String, dmgURL: URL)
     case downloading(pct: Double)
     case installing
     case restarting
