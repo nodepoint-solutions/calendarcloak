@@ -5,8 +5,8 @@ struct SetupWizardView: View {
     let store: CalendarStoreProtocol
     let settings: AppSettings
     let engine: SyncEngine
+    let onComplete: () -> Void  // called on Activate; caller is responsible for closing the window
 
-    @Environment(\.dismiss) private var dismiss
     @State private var step: Step = .selectCalendars
     @State private var selectedIDs: Set<String> = []
     @State private var allCalendars: [EKCalendar] = []
@@ -28,7 +28,7 @@ struct SetupWizardView: View {
                         settings.selectedCalendarIDs = Array(selectedIDs)
                         settings.hasCompletedSetup = true
                         engine.start()
-                        dismiss()
+                        onComplete()
                     },
                     onBack: { step = .selectCalendars }
                 )

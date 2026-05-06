@@ -2,12 +2,14 @@ import SwiftUI
 
 struct TrayMenuView: View {
     @Environment(\.openSettings) private var openSettings
-    @Environment(\.openWindow) private var openWindow
     let state: AppState
     let settings: AppSettings
     let eventKitStore: EventKitStore
     let engine: SyncEngine
     let logger: Logger
+
+    // Kept alive for the lifetime of the app so the window isn't deallocated
+    private static var setupWindowController: NSWindowController?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -33,14 +35,35 @@ struct TrayMenuView: View {
             if settings.hasCompletedSetup {
                 engine.start()
             } else {
-                openWindow(id: "setup")
-                NSApp.activate(ignoringOtherApps: true)
+                openSetupWindow()
             }
         } catch {
             state.isAccessDenied = true
             logger.error("EventKit access denied: \(error)")
             showAccessDeniedAlert()
         }
+    }
+
+    @MainActor
+    private func openSetupWindow() {
+        let view = SetupWizardView(
+            store: eventKitStore,
+            settings: settings,
+            engine: engine,
+            onComplete: {
+                Self.setupWindowController?.close()
+                Self.setupWindowController = nil
+            }
+        )
+        let hosting = NSHostingController(rootView: view)
+        let window = NSWindow(contentViewController: hosting)
+        window.title = "Set Up Bee Busy"
+        window.styleMask = [.titled, .closable]
+        window.center()
+        let controller = NSWindowController(window: window)
+        Self.setupWindowController = controller
+        controller.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     private func showAccessDeniedAlert() {

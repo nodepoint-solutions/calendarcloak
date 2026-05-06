@@ -31,11 +31,6 @@ struct BeeBusyApp: App {
             )
         }
 
-        Window("Set Up Bee Busy", id: "setup") {
-            SetupWizardView(store: eventKitStore, settings: settings, engine: engine)
-        }
-        .windowResizability(.contentSize)
-
         Settings {
             SettingsView(
                 settings: settings,
