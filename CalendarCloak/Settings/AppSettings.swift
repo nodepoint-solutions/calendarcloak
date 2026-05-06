@@ -57,4 +57,55 @@ final class AppSettings {
             }
         }
     }
+
+    var includeAllDayEvents: Bool {
+        get {
+            access(keyPath: \.includeAllDayEvents)
+            guard defaults.object(forKey: "includeAllDayEvents") != nil else { return true }
+            return defaults.bool(forKey: "includeAllDayEvents")
+        }
+        set {
+            withMutation(keyPath: \.includeAllDayEvents) {
+                defaults.set(newValue, forKey: "includeAllDayEvents")
+            }
+        }
+    }
+
+    var workHoursEnabled: Bool {
+        get {
+            access(keyPath: \.workHoursEnabled)
+            return defaults.bool(forKey: "workHoursEnabled")
+        }
+        set {
+            withMutation(keyPath: \.workHoursEnabled) {
+                defaults.set(newValue, forKey: "workHoursEnabled")
+            }
+        }
+    }
+
+    var workHoursStart: Int {
+        get {
+            access(keyPath: \.workHoursStart)
+            guard defaults.object(forKey: "workHoursStart") != nil else { return 9 }
+            return defaults.integer(forKey: "workHoursStart")
+        }
+        set {
+            withMutation(keyPath: \.workHoursStart) {
+                defaults.set(newValue, forKey: "workHoursStart")
+            }
+        }
+    }
+
+    var workHoursEnd: Int {
+        get {
+            access(keyPath: \.workHoursEnd)
+            guard defaults.object(forKey: "workHoursEnd") != nil else { return 18 }
+            return defaults.integer(forKey: "workHoursEnd")
+        }
+        set {
+            withMutation(keyPath: \.workHoursEnd) {
+                defaults.set(newValue, forKey: "workHoursEnd")
+            }
+        }
+    }
 }
