@@ -174,13 +174,17 @@ struct SettingsView: View {
         }
     }
 
+    private static let hourFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        return f
+    }()
+
     private func hourLabel(_ hour: Int) -> String {
         var components = DateComponents()
         components.hour = hour
         components.minute = 0
         let date = Calendar.current.date(from: components) ?? Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: date)
+        return Self.hourFormatter.string(from: date)
     }
 }

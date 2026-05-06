@@ -243,6 +243,7 @@ struct SetupWizardView: View {
             Button("Activate CalendarCloak") {
                 settings.selectedCalendarIDs = Array(selectedIDs)
                 settings.hasCompletedSetup = true
+                engine.deleteLegacyBusyEvents()
                 engine.start()
                 onComplete()
             }

@@ -88,7 +88,7 @@ final class EventKitStore: CalendarStoreProtocol {
     func delete(_ event: CalendarEvent) {
         // SAFETY GUARD: abort if this is not one of our managed Busy events
         guard BusyEventMarker.sourceID(from: event.notes) != nil else {
-            logger.error("SAFETY: attempted to delete non-bee-busy event \(event.id) — aborted")
+            logger.error("SAFETY: attempted to delete non-managed event \(event.id) — aborted")
             return
         }
         // For recurring series, bypass the occurrence cache (which holds the last fetched occurrence)
