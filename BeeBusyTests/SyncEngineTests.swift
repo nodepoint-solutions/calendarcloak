@@ -63,6 +63,7 @@ final class SyncEngineTests: XCTestCase {
         engine.deleteAllBusyEvents()
 
         XCTAssertTrue(store.deletedEvents.isEmpty)
+        XCTAssertEqual(store.fetchEventsCallCount, 1, "fetchEvents should be called even when result is empty")
     }
 
     func test_deleteAllBusyEvents_noCalendarsIsNoop() {

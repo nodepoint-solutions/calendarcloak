@@ -93,7 +93,7 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will remove all Busy events from all calendars. This cannot be undone.")
+            Text("This will remove all Busy events from all calendars. If syncing is active, they will be recreated on the next sync.")
         }
     }
 

@@ -4,6 +4,8 @@ import Foundation
 
 final class MockCalendarStore: CalendarStoreProtocol {
     var stubbedCalendars: [EKCalendar] = []
+    // Separate from stubbedCalendars because EKCalendar requires an EKEventStore to instantiate.
+    // Keep both in sync when a test exercises both fetchCalendars() and fetchAllCalendarIDs().
     var stubbedCalendarIDs: [String] = []
     var stubbedEvents: [CalendarEvent] = []
     var createdDrafts: [BusyEventDraft] = []

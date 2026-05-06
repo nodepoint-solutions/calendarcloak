@@ -44,14 +44,14 @@ final class SyncEngine {
     func deleteAllBusyEvents() {
         let calendarIDs = store.fetchAllCalendarIDs()
         guard !calendarIDs.isEmpty else { return }
-        // Use distantPast so past Busy events (outside the normal look-forward window) are also removed.
+        // Intentionally wider than the look-forward window: a full sweep ensures past Busy events
+        // (created when they were future, now aged out of the normal window) are also removed.
         let events = store.fetchEvents(calendarIDs: calendarIDs, start: .distantPast, end: .distantFuture)
         let busyToDelete = events.filter { BusyEventMarker.isBusyEvent($0) }
-        logger.info("Deleting \(busyToDelete.count) Busy events across all calendars")
         for event in busyToDelete {
             store.delete(event)
         }
-        logger.info("Deleted \(busyToDelete.count) Busy events")
+        logger.info("Deleted \(busyToDelete.count) Busy events across all calendars")
     }
 
     // MARK: - Dry run (read-only — returns plan + events without executing)
