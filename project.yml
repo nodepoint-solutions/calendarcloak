@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.nodepoint
   deploymentTarget:
     macOS: "26.0"
+  createIntermediateGroups: true
 targets:
   BeeBusy:
     type: application
