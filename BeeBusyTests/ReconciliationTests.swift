@@ -78,4 +78,75 @@ final class ReconciliationTests: XCTestCase {
         // srcA → calB + calC (2 creates), srcB → calA + calC (2 creates)
         XCTAssertEqual(ops.count, 4)
     }
+
+    // MARK: - Recurring series
+
+    private func recurringSource(id: String, cal: String, start: Date, end: Date,
+                                 seriesEndDate: Date? = nil) -> CalendarEvent {
+        CalendarEvent(id: id, calendarID: cal, calendarName: cal,
+                      title: "Standup", startDate: start, endDate: end,
+                      isAllDay: false, notes: nil, isAccepted: true,
+                      isRecurring: true, isDetached: false, seriesEndDate: seriesEndDate)
+    }
+
+    private func recurringBusy(sourceID: String, cal: String, start: Date, end: Date,
+                               seriesEndDate: Date?) -> CalendarEvent {
+        CalendarEvent(id: UUID().uuidString, calendarID: cal, calendarName: cal,
+                      title: "Busy", startDate: start, endDate: end,
+                      isAllDay: false, notes: BusyEventMarker.notes(for: sourceID), isAccepted: true,
+                      isRecurring: true, isDetached: false, seriesEndDate: seriesEndDate)
+    }
+
+    private let windowEnd = Date().addingTimeInterval(30 * 86400)
+
+    func test_recurringSeries_createsSingleBusySeriesPerTargetCalendar() {
+        // Three occurrences of the same series in the window — should produce ONE create per target, not three
+        let occ1 = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
+        let occ2 = recurringSource(id: "series1", cal: calA, start: now.addingTimeInterval(7 * 86400), end: now.addingTimeInterval(7 * 86400 + 3600))
+        let occ3 = recurringSource(id: "series1", cal: calA, start: now.addingTimeInterval(14 * 86400), end: now.addingTimeInterval(14 * 86400 + 3600))
+        let ops = reconcile(eligibleSources: [occ1, occ2, occ3], busyEvents: [],
+                            configuredCalendarIDs: [calA, calB, calC], windowEnd: windowEnd)
+        // ONE create per target calendar (not 3 × 2 = 6)
+        XCTAssertEqual(ops.count, 2)
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        XCTAssertTrue(creates.allSatisfy { $0.recurrenceCapDate == windowEnd })
+        XCTAssertTrue(creates.allSatisfy { $0.startDate == now })  // anchor = earliest occurrence
+    }
+
+    func test_recurringSeries_noOpWhenBusySeriesUpToDate() {
+        let src = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
+        let existingB = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                      end: now.addingTimeInterval(3600), seriesEndDate: windowEnd)
+        let existingC = recurringBusy(sourceID: "series1", cal: calC, start: now,
+                                      end: now.addingTimeInterval(3600), seriesEndDate: windowEnd)
+        let ops = reconcile(eligibleSources: [src], busyEvents: [existingB, existingC],
+                            configuredCalendarIDs: [calA, calB, calC], windowEnd: windowEnd)
+        XCTAssertEqual(ops.count, 0)
+    }
+
+    func test_recurringSeries_recreatesWhenCapIsStale() {
+        let src = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
+        let staleEnd = now.addingTimeInterval(10 * 86400)  // cap was 10 days, window is now 30 days
+        let existingB = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                      end: now.addingTimeInterval(3600), seriesEndDate: staleEnd)
+        let ops = reconcile(eligibleSources: [src], busyEvents: [existingB],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        XCTAssertTrue(ops.contains(.delete(existingB)))
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        XCTAssertTrue(creates.contains { $0.calendarID == calB && $0.recurrenceCapDate == windowEnd })
+    }
+
+    func test_detachedOccurrence_treatedAsIndividualEvent() {
+        // A detached occurrence (isDetached=true) should be handled individually, not as part of a series
+        let detached = CalendarEvent(id: "detached-unique-id", calendarID: calA, calendarName: calA,
+                                     title: "Standup (moved)", startDate: now, endDate: now.addingTimeInterval(3600),
+                                     isAllDay: false, notes: nil, isAccepted: true,
+                                     isRecurring: false, isDetached: true, seriesEndDate: nil)
+        let ops = reconcile(eligibleSources: [detached], busyEvents: [],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        // Individual event — no recurrenceCapDate
+        XCTAssertTrue(creates.allSatisfy { $0.recurrenceCapDate == nil })
+        XCTAssertEqual(creates.count, 1)
+    }
 }

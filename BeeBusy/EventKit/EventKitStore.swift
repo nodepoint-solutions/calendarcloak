@@ -12,6 +12,8 @@ protocol CalendarStoreProtocol: AnyObject {
 final class EventKitStore: CalendarStoreProtocol {
     private let store = EKEventStore()
     private let logger: Logger
+    // Keyed by calendarItemIdentifier. For recurring series all occurrences share the same key;
+    // the last one written wins, which is fine since any occurrence carries the same recurrence rules.
     private var ekEventCache: [String: EKEvent] = [:]
 
     init(logger: Logger) {
@@ -34,6 +36,7 @@ final class EventKitStore: CalendarStoreProtocol {
         return ekEvents.compactMap { ekEvent -> CalendarEvent? in
             guard let cal = ekEvent.calendar else { return nil }
             ekEventCache[ekEvent.calendarItemIdentifier] = ekEvent
+            let hasRules = !(ekEvent.recurrenceRules?.isEmpty ?? true)
             return CalendarEvent(
                 id: ekEvent.calendarItemIdentifier,
                 calendarID: cal.calendarIdentifier,
@@ -43,7 +46,10 @@ final class EventKitStore: CalendarStoreProtocol {
                 endDate: ekEvent.endDate,
                 isAllDay: ekEvent.isAllDay,
                 notes: ekEvent.notes,
-                isAccepted: resolveAcceptance(ekEvent)
+                isAccepted: resolveAcceptance(ekEvent),
+                isRecurring: hasRules && !ekEvent.isDetached,
+                isDetached: ekEvent.isDetached,
+                seriesEndDate: ekEvent.recurrenceRules?.first?.recurrenceEnd?.endDate
             )
         }
     }
@@ -61,6 +67,14 @@ final class EventKitStore: CalendarStoreProtocol {
         event.endDate = draft.endDate
         event.isAllDay = draft.isAllDay
         event.calendar = calendar
+
+        if let capDate = draft.recurrenceCapDate,
+           let sourceRules = ekEventCache[draft.sourceID]?.recurrenceRules,
+           !sourceRules.isEmpty {
+            event.recurrenceRules = sourceRules.map { cappedRule($0, cap: capDate) }
+            logger.info("Creating recurring Busy series in \(calendar.title) for source \(draft.sourceID) capped to \(capDate)")
+        }
+
         try store.save(event, span: .thisEvent, commit: true)
         logger.info("Created Busy event in \(calendar.title) for source \(draft.sourceID)")
     }
@@ -78,8 +92,12 @@ final class EventKitStore: CalendarStoreProtocol {
             return
         }
         do {
-            try store.remove(ekEvent, span: .thisEvent, commit: true)
-            logger.info("Deleted Busy event \(event.id)")
+            // For recurring Busy series, remove all occurrences from this point forward.
+            // Since we only ever create Busy events starting from today, this removes the whole series.
+            // For individual events, remove only this occurrence.
+            let span: EKSpan = event.isRecurring ? .futureEvents : .thisEvent
+            try store.remove(ekEvent, span: span, commit: true)
+            logger.info("Deleted Busy event \(event.id) (recurring: \(event.isRecurring))")
         } catch {
             logger.error("Failed to delete Busy event \(event.id): \(error)")
         }
@@ -92,5 +110,26 @@ final class EventKitStore: CalendarStoreProtocol {
             return true  // self-created event, no attendees
         }
         return attendees.first(where: { $0.isCurrentUser })?.participantStatus == .accepted
+    }
+
+    private func cappedRule(_ rule: EKRecurrenceRule, cap: Date) -> EKRecurrenceRule {
+        // Honour the source series' own end date if it falls before our window cap.
+        let effectiveCap: Date
+        if let sourceEnd = rule.recurrenceEnd?.endDate {
+            effectiveCap = min(sourceEnd, cap)
+        } else {
+            effectiveCap = cap
+        }
+        return EKRecurrenceRule(
+            recurrenceWith: rule.frequency,
+            interval: rule.interval,
+            daysOfTheWeek: rule.daysOfTheWeek,
+            daysOfTheMonth: rule.daysOfTheMonth,
+            monthsOfTheYear: rule.monthsOfTheYear,
+            weeksOfTheYear: rule.weeksOfTheYear,
+            daysOfTheYear: rule.daysOfTheYear,
+            setPositions: rule.setPositions,
+            end: EKRecurrenceEnd(end: effectiveCap)
+        )
     }
 }

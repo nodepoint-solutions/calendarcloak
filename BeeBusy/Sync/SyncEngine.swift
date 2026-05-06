@@ -49,7 +49,8 @@ final class SyncEngine {
         let allEvents = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
         let (sources, busy) = partition(allEvents)
         let eligible = sources.filter { EventEligibility.isEligible($0) }
-        let ops = reconcile(eligibleSources: eligible, busyEvents: busy, configuredCalendarIDs: calendarIDs)
+        let ops = reconcile(eligibleSources: eligible, busyEvents: busy,
+                            configuredCalendarIDs: calendarIDs, windowEnd: window.end)
         return (ops, allEvents)
     }
 
@@ -83,7 +84,8 @@ final class SyncEngine {
         let allEvents = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
         let (sources, busy) = partition(allEvents)
         let eligible = sources.filter { EventEligibility.isEligible($0) }
-        let operations = reconcile(eligibleSources: eligible, busyEvents: busy, configuredCalendarIDs: calendarIDs)
+        let operations = reconcile(eligibleSources: eligible, busyEvents: busy,
+                                   configuredCalendarIDs: calendarIDs, windowEnd: window.end)
 
         logger.info("Plan: \(operations.count) operations")
         for op in operations {
