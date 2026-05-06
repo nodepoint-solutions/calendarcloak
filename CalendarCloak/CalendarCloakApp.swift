@@ -30,7 +30,7 @@ struct CalendarCloakApp: App {
 
     var body: some Scene {
         MenuBarExtra("CalendarCloak", systemImage: "calendar.badge.clock") {
-            TrayMenuView(state: state)
+            TrayMenuView(state: state, logger: logger)
         }
 
         Settings {

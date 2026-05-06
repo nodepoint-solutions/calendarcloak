@@ -3,6 +3,7 @@ import SwiftUI
 struct TrayMenuView: View {
     @Environment(\.openSettings) private var openSettings
     let state: AppState
+    let logger: Logger
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,6 +35,7 @@ struct TrayMenuView: View {
                             await MainActor.run { state.updateState = newState }
                         }
                     } catch {
+                        logger.error("Update install failed: \(error)")
                         await MainActor.run {
                             state.updateState = .available(version: version, dmgURL: dmgURL)
                         }
