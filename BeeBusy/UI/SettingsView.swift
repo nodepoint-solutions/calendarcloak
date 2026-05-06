@@ -4,6 +4,7 @@ import ServiceManagement
 
 struct SettingsView: View {
     @State private var calendars: [EKCalendar] = []
+    @State private var showingCleanupConfirmation = false
     let settings: AppSettings
     let store: CalendarStoreProtocol
     let logger: Logger
@@ -71,12 +72,29 @@ struct SettingsView: View {
                         .appendingPathComponent("Logs/BeeBusy/bee-busy.log")
                     NSWorkspace.shared.open(logsURL)
                 }
+
+                Button("Delete All Busy Events…") {
+                    showingCleanupConfirmation = true
+                }
+                .foregroundStyle(.red)
             }
         }
         .formStyle(.grouped)
         .frame(minWidth: 360)
         .padding()
         .onAppear { calendars = store.fetchCalendars() }
+        .confirmationDialog(
+            "Delete All Busy Events?",
+            isPresented: $showingCleanupConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                engine.deleteAllBusyEvents()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will remove all Busy events from all calendars. This cannot be undone.")
+        }
     }
 
     private func bindingFor(_ calendar: EKCalendar) -> Binding<Bool> {
