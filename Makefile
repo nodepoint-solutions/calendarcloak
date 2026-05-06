@@ -1,4 +1,4 @@
-XCODEBUILD := /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
+XCODEBUILD := xcodebuild
 PROJECT    := BeeBusy.xcodeproj
 SCHEME     := BeeBusy
 DERIVED    := $(HOME)/Library/Developer/Xcode/DerivedData
