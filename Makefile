@@ -1,3 +1,4 @@
+export DEVELOPER_DIR := /Applications/Xcode.app/Contents/Developer
 XCODEBUILD := xcodebuild
 PROJECT    := BeeBusy.xcodeproj
 SCHEME     := BeeBusy
