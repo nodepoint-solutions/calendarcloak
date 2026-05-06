@@ -2,11 +2,14 @@
 
 A macOS menu bar app that keeps your calendars in sync — without sharing your event details.
 
+**Privacy-first.** Your calendar data never leaves your Mac. No account required, no cloud sync, no telemetry.
+
 ---
 
 ## Contents
 
 - [Why](#why)
+- [Privacy](#privacy)
 - [Installation](#installation)
 - [How it works](#how-it-works)
 - [Settings](#settings)
@@ -20,6 +23,17 @@ If you have more than one calendar — a personal one and a work one, for exampl
 The usual workaround is to manually duplicate events across calendars, which is tedious and means sharing event titles and details you might not want to share.
 
 CalendarCloak solves this by watching your selected calendars and creating anonymous **Busy** blocks in each one whenever you have an event in another. The blocks show only the time — no titles, locations, or descriptions are ever copied.
+
+---
+
+## Privacy
+
+CalendarCloak is designed to keep your data on your device.
+
+- **No account, no cloud.** CalendarCloak has no backend. Your events are read and written entirely on your Mac using the macOS Calendar framework — nothing is stored or synced anywhere else.
+- **macOS native permissions.** On first launch, macOS will ask you to grant Calendar access using the standard system permission prompt. CalendarCloak can only read and write your calendars if you approve.
+- **No titles, locations, or descriptions are ever copied.** Busy blocks contain only a start and end time.
+- **Update checks are version-only.** CalendarCloak can check GitHub for new releases. This request contains nothing about you or your data — it is a plain version-number lookup. No identifiers are transmitted.
 
 ---
 
