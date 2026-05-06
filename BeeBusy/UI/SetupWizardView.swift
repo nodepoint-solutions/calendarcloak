@@ -13,64 +13,74 @@ struct SetupWizardView: View {
     @State private var dryRunOperations: [ReconciliationOperation] = []
     @State private var dryRunEvents: [CalendarEvent] = []
 
-    enum Step { case selectCalendars, preview }
+    enum Step: Hashable { case selectCalendars, preview }
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            wizardHeader
             Divider()
             switch step {
-            case .selectCalendars: calendarSelectionBody
-            case .preview: previewBody
+            case .selectCalendars: calendarSelectionStep
+            case .preview: previewStep
             }
         }
-        .frame(width: 520)
+        .frame(width: 820)
         .onAppear { allCalendars = store.fetchCalendars() }
     }
 
     // MARK: - Header
 
-    private var header: some View {
-        HStack(spacing: 14) {
-            Text("🐝")
-                .font(.system(size: 40))
+    private var wizardHeader: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.yellow.opacity(0.15))
+                    .frame(width: 48, height: 48)
+                Text("🐝").font(.system(size: 26))
+            }
             VStack(alignment: .leading, spacing: 2) {
-                Text("Bee Busy")
-                    .font(.title2).bold()
+                Text("Bee Busy").font(.title2).bold()
                 Text(step == .selectCalendars
-                     ? "Choose which calendars to keep in sync"
-                     : "Review what will be created")
+                     ? "Select calendars to keep in sync"
+                     : "Preview — Busy blocks that will be created")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            stepIndicator
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 20)
-        .background(Color(nsColor: .windowBackgroundColor))
-    }
-
-    private var stepIndicator: some View {
-        HStack(spacing: 6) {
-            ForEach([Step.selectCalendars, .preview], id: \.self) { s in
-                Circle()
-                    .fill(s == step ? Color.accentColor : Color(nsColor: .separatorColor))
-                    .frame(width: 8, height: 8)
+            HStack(spacing: 10) {
+                stepLabel(number: 1, title: "Calendars", current: step == .selectCalendars)
+                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                stepLabel(number: 2, title: "Preview", current: step == .preview)
             }
         }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 18)
     }
 
-    // MARK: - Step 1: Calendar selection
+    private func stepLabel(number: Int, title: String, current: Bool) -> some View {
+        HStack(spacing: 5) {
+            Text("\(number)")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(current ? .white : Color(nsColor: .tertiaryLabelColor))
+                .frame(width: 17, height: 17)
+                .background(current ? Color.accentColor : Color(nsColor: .separatorColor))
+                .clipShape(Circle())
+            Text(title)
+                .font(.system(size: 12))
+                .foregroundStyle(current ? .primary : Color(nsColor: .tertiaryLabelColor))
+        }
+    }
 
-    private var calendarSelectionBody: some View {
+    // MARK: - Step 1: Calendar Selection
+
+    private var calendarSelectionStep: some View {
         VStack(spacing: 0) {
+            syncConceptBanner
+            Divider()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if allCalendars.isEmpty {
-                        Text("No calendars found.")
-                            .foregroundStyle(.secondary)
-                            .padding()
+                        Text("No calendars found.").foregroundStyle(.secondary).padding()
                     } else {
                         ForEach(calendarsBySource, id: \.sourceTitle) { group in
                             calendarGroupSection(group)
@@ -79,20 +89,35 @@ struct SetupWizardView: View {
                 }
                 .padding(24)
             }
-
             Divider()
             selectionFooter
         }
     }
 
+    private var syncConceptBanner: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "lock.shield.fill")
+                .font(.title3)
+                .foregroundStyle(Color.accentColor.opacity(0.85))
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Only \u{201C}Busy\u{201D} is shared \u{2014} your event details stay private")
+                    .font(.subheadline).bold()
+                Text("Events from each calendar appear as anonymous time blocks in all your other selected calendars.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(Color.accentColor.opacity(0.05))
+    }
+
     private func calendarGroupSection(_ group: (sourceTitle: String, calendars: [EKCalendar])) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(group.sourceTitle)
-                .font(.headline)
-                .foregroundStyle(.primary)
-
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(group.calendars.enumerated()), id: \.element.calendarIdentifier) { index, cal in
+            Text(group.sourceTitle).font(.subheadline).bold()
+            VStack(spacing: 0) {
+                ForEach(Array(group.calendars.enumerated()), id: \.element.calendarIdentifier) { idx, cal in
                     Toggle(isOn: Binding(
                         get: { selectedIDs.contains(cal.calendarIdentifier) },
                         set: { on in
@@ -100,29 +125,23 @@ struct SetupWizardView: View {
                             else { selectedIDs.remove(cal.calendarIdentifier) }
                         }
                     )) {
-                        HStack(spacing: 8) {
-                            Circle()
+                        HStack(spacing: 9) {
+                            RoundedRectangle(cornerRadius: 3)
                                 .fill(Color(cgColor: cal.cgColor))
-                                .frame(width: 10, height: 10)
+                                .frame(width: 12, height: 12)
                             Text(cal.title)
-                                .font(.body)
                         }
                     }
                     .toggleStyle(.checkbox)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
-                    if index < group.calendars.count - 1 {
-                        Divider().padding(.leading, 14)
-                    }
+                    if idx < group.calendars.count - 1 { Divider().padding(.leading, 14) }
                 }
             }
             .background(Color(nsColor: .controlBackgroundColor))
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color(nsColor: .separatorColor), lineWidth: 0.5)
-            )
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(nsColor: .separatorColor), lineWidth: 0.5))
         }
     }
 
@@ -134,16 +153,14 @@ struct SetupWizardView: View {
                 } else if selectedIDs.count == 1 {
                     Label("Select one more calendar", systemImage: "info.circle")
                 } else {
-                    Label("\(selectedIDs.count) calendars selected", systemImage: "checkmark.circle.fill")
+                    Label("\(selectedIDs.count) calendars will sync with each other as \u{201C}Busy\u{201D}", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 }
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
-
             Spacer()
-
-            Button("Preview") {
+            Button("See Preview") {
                 let result = engine.dryRun(calendarIDs: Array(selectedIDs))
                 dryRunOperations = result.operations
                 dryRunEvents = result.events
@@ -160,130 +177,67 @@ struct SetupWizardView: View {
 
     // MARK: - Step 2: Preview
 
-    private var previewBody: some View {
+    private var previewStep: some View {
         VStack(spacing: 0) {
-            previewContent
+            previewInfoBar
+            Divider()
+            if sourceOccurrences.isEmpty {
+                emptyPreview
+            } else {
+                WizardWeekCalendar(sourceOccurrences: sourceOccurrences, weekDays: previewWeekDays)
+                    .padding(16)
+            }
             Divider()
             previewFooter
         }
     }
 
-    private var previewContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                let createGroups = createsBySourceCalendar
-
-                if createGroups.isEmpty {
-                    VStack(spacing: 8) {
-                        Image(systemName: "calendar.badge.checkmark")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.secondary)
-                        Text("No events found in the look-forward window.")
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 40)
-                } else {
-                    Text("\(totalCreates) Busy event\(totalCreates == 1 ? "" : "s") will be created across your calendars.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    ForEach(createGroups, id: \.calendarID) { group in
-                        previewGroupSection(group)
-                    }
-                }
+    private var previewInfoBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "lock.fill").font(.caption).foregroundStyle(.secondary)
+            Text("Only the time is blocked \u{2014} no titles, locations, or details are ever shared")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            let uniqueCount = Set(sourceOccurrences.map { $0.id }).count
+            if uniqueCount > 0 {
+                Text("\(uniqueCount) event\(uniqueCount == 1 ? "" : "s") \u{2192} Busy")
+                    .font(.system(size: 11).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color(nsColor: .separatorColor).opacity(0.4))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
             }
-            .padding(24)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(Color(nsColor: .controlBackgroundColor))
     }
 
-    private func previewGroupSection(_ group: (calendarName: String, calendarID: String, drafts: [BusyEventDraft])) -> some View {
-        // Deduplicate by sourceID — one source event creates N drafts (one per target calendar),
-        // but we only show it once. The target calendars are shown in the header.
-        let uniqueSourceIDs = group.drafts.reduce(into: [String]()) { result, draft in
-            if !result.contains(draft.sourceID) { result.append(draft.sourceID) }
+    private var emptyPreview: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "calendar.badge.checkmark").font(.system(size: 36)).foregroundStyle(.secondary)
+            Text("No upcoming events in the sync window").font(.subheadline).foregroundStyle(.secondary)
+            Text("Bee Busy will sync events as they appear.").font(.caption).foregroundStyle(.tertiary)
         }
-        let shown = Array(uniqueSourceIDs.prefix(10))
-        let overflow = uniqueSourceIDs.count - shown.count
-
-        let targetNames = Set(group.drafts.compactMap { draft in
-            dryRunEvents.first(where: { $0.calendarID == draft.calendarID })?.calendarName
-        }).sorted().joined(separator: ", ")
-
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 4) {
-                Text(group.calendarName)
-                    .font(.headline)
-                Image(systemName: "arrow.right")
-                    .font(.caption).bold()
-                    .foregroundStyle(.secondary)
-                Text(targetNames)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(shown.enumerated()), id: \.offset) { index, sourceID in
-                    let event = dryRunEvents.first(where: { $0.id == sourceID })
-                    let draft = group.drafts.first(where: { $0.sourceID == sourceID })
-                    HStack {
-                        Text(event?.title ?? "Event")
-                            .font(.body)
-                        Spacer()
-                        if let draft {
-                            Text(formatRange(start: draft.startDate, end: draft.endDate, isAllDay: draft.isAllDay))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    if index < shown.count - 1 {
-                        Divider().padding(.leading, 14)
-                    }
-                }
-            }
-            .background(Color(nsColor: .controlBackgroundColor))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(nsColor: .separatorColor), lineWidth: 0.5))
-
-            if overflow > 0 {
-                Text("+ \(overflow) more not shown")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 4)
-            }
-        }
+        .frame(maxWidth: .infinity, minHeight: 220)
     }
 
     private var previewFooter: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "checkmark.shield.fill")
-                    .foregroundStyle(.green)
-                Text("This preview is shown once. After activating, Bee Busy runs silently — no further prompts.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.green.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-            HStack {
-                Button("← Back") { step = .selectCalendars }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                Spacer()
-                Button("Activate") {
-                    settings.selectedCalendarIDs = Array(selectedIDs)
-                    settings.hasCompletedSetup = true
-                    engine.start()
-                    onComplete()
-                }
-                .buttonStyle(.borderedProminent)
+        HStack {
+            Button("\u{2190} Back") { step = .selectCalendars }
+                .buttonStyle(.bordered)
                 .controlSize(.large)
+            Spacer()
+            Button("Activate Bee Busy") {
+                settings.selectedCalendarIDs = Array(selectedIDs)
+                settings.hasCompletedSetup = true
+                engine.start()
+                onComplete()
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
@@ -298,34 +252,236 @@ struct SetupWizardView: View {
             .sorted { $0.sourceTitle < $1.sourceTitle }
     }
 
-    private var createsBySourceCalendar: [(calendarName: String, calendarID: String, drafts: [BusyEventDraft])] {
-        var grouped: [String: (name: String, drafts: [BusyEventDraft])] = [:]
-        for case .create(let draft) in dryRunOperations {
-            guard let source = dryRunEvents.first(where: { $0.id == draft.sourceID }) else { continue }
-            let key = source.calendarID
-            if grouped[key] == nil { grouped[key] = (name: source.calendarName, drafts: []) }
-            grouped[key]!.drafts.append(draft)
+    private var allBusyDrafts: [BusyEventDraft] {
+        dryRunOperations.compactMap { if case .create(let d) = $0 { return d }; return nil }
+    }
+
+    // All source event occurrences (individual + every recurring occurrence) that will become Busy.
+    // EventKit returns each recurring occurrence as a distinct CalendarEvent in dryRunEvents,
+    // all sharing the same .id (calendarItemIdentifier = series ID). We match against draft sourceIDs.
+    private var sourceOccurrences: [CalendarEvent] {
+        let busySourceIDs = Set(allBusyDrafts.map { $0.sourceID })
+        return dryRunEvents.filter { busySourceIDs.contains($0.id) && !BusyEventMarker.isBusyEvent($0) }
+    }
+
+    // Show 7-day windows starting from today, advancing 7 days at a time until one has events.
+    // Starts from today rather than Monday because we only sync future events.
+    private var previewWeekDays: [Date] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        for offset in 0..<8 {
+            let start = cal.date(byAdding: .day, value: offset * 7, to: today)!
+            let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: start)! }
+            if sourceOccurrences.contains(where: { ev in days.contains { cal.isDate(ev.startDate, inSameDayAs: $0) } }) {
+                return days
+            }
         }
-        return grouped.map { (calendarID: $0.key, name: $0.value.name, drafts: $0.value.drafts) }
-            .sorted { $0.name < $1.name }
-            .map { (calendarName: $0.name, calendarID: $0.calendarID, drafts: $0.drafts) }
-    }
-
-    private var totalCreates: Int {
-        Set(dryRunOperations.compactMap { op -> String? in
-            if case .create(let draft) = op { return draft.sourceID }
-            return nil
-        }).count
-    }
-
-    private func formatRange(start: Date, end: Date, isAllDay: Bool) -> String {
-        if isAllDay { return "All day" }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "EEE HH:mm"
-        let endFmt = DateFormatter()
-        endFmt.dateFormat = "HH:mm"
-        return "\(fmt.string(from: start))–\(endFmt.string(from: end))"
+        return (0..<7).map { cal.date(byAdding: .day, value: $0, to: today)! }
     }
 }
 
-extension SetupWizardView.Step: Hashable {}
+// MARK: - Week Calendar
+
+private struct WizardWeekCalendar: View {
+    let sourceOccurrences: [CalendarEvent]
+    let weekDays: [Date]  // 7 days Mon–Sun
+
+    // Reduce density: tighter hours, smaller row height
+    private let hourHeight: CGFloat = 34
+    private let startHour: Int = 8
+    private let endHour: Int = 19   // 8 AM – 7 PM = 11 hours visible
+    private let timeWidth: CGFloat = 40  // MUST match across all rows for alignment
+
+    private var totalHeight: CGFloat { CGFloat(endHour - startHour) * hourHeight }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            dayHeaderRow
+            hairline
+            allDayRow
+            hairline
+            timeGridRow  // no ScrollView — full height is visible
+        }
+        .background(Color(nsColor: .controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(nsColor: .separatorColor), lineWidth: 0.5))
+    }
+
+    // MARK: Rows — each shares the exact same column structure for alignment
+
+    private var dayHeaderRow: some View {
+        HStack(spacing: 0) {
+            Color.clear.frame(width: timeWidth, height: 38)
+            vline
+            ForEach(Array(weekDays.enumerated()), id: \.offset) { idx, day in
+                VStack(spacing: 1) {
+                    Text(dayAbbrev(day))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    ZStack {
+                        if Calendar.current.isDateInToday(day) {
+                            Circle().fill(Color.accentColor).frame(width: 20, height: 20)
+                        }
+                        Text(dayNum(day))
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Calendar.current.isDateInToday(day) ? .white : .primary)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 38)
+                if idx < weekDays.count - 1 { vline }
+            }
+        }
+    }
+
+    private var allDayRow: some View {
+        HStack(spacing: 0) {
+            Text("all-day")
+                .font(.system(size: 8))
+                .foregroundStyle(.quaternary)
+                .frame(width: timeWidth, height: 18)
+                .multilineTextAlignment(.trailing)
+                .padding(.trailing, 4)
+            vline
+            ForEach(Array(weekDays.enumerated()), id: \.offset) { idx, day in
+                let events = occurrencesForDay(day).filter { $0.isAllDay }
+                ZStack {
+                    if !events.isEmpty {
+                        Text("Busy")
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 2)
+                            .background(Color(nsColor: .systemGray).opacity(0.2))
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                            .padding(.horizontal, 2)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 18)
+                if idx < weekDays.count - 1 { vline }
+            }
+        }
+        .frame(height: 18)
+    }
+
+    private var timeGridRow: some View {
+        HStack(alignment: .top, spacing: 0) {
+            // Time labels — width MUST equal timeWidth to keep columns aligned
+            VStack(spacing: 0) {
+                ForEach(startHour..<endHour, id: \.self) { h in
+                    Text(hourLabel(h))
+                        .font(.system(size: 8))
+                        .foregroundStyle(.secondary)
+                        .frame(width: timeWidth, height: hourHeight, alignment: .topTrailing)
+                        .padding(.trailing, 4)
+                        .padding(.top, 2)
+                }
+            }
+            vline
+            ForEach(Array(weekDays.enumerated()), id: \.offset) { idx, day in
+                dayColumn(for: day)
+                if idx < weekDays.count - 1 { vline }
+            }
+        }
+        .frame(height: totalHeight)
+    }
+
+    // MARK: Day column
+
+    private func dayColumn(for day: Date) -> some View {
+        let events = occurrencesForDay(day).filter { !$0.isAllDay }
+
+        return ZStack(alignment: .topLeading) {
+            // Background grid: solid line at each hour, dashed at half-hour
+            VStack(spacing: 0) {
+                ForEach(startHour..<endHour, id: \.self) { _ in
+                    VStack(spacing: 0) {
+                        Color(nsColor: .separatorColor).opacity(0.45).frame(height: 0.5)
+                        Color.clear.frame(height: hourHeight / 2 - 0.5)
+                        Color(nsColor: .separatorColor).opacity(0.18).frame(height: 0.5)
+                        Color.clear.frame(height: hourHeight / 2 - 0.5)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+            // Busy blocks positioned by time
+            ForEach(Array(events.enumerated()), id: \.offset) { _, event in
+                let y = yPos(event.startDate)
+                let h = max(blockHeight(event.startDate, event.endDate), 14)
+                if y < totalHeight {
+                    busyBlock(height: h)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 1)
+                        .offset(y: y)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: totalHeight)
+        .clipped()
+    }
+
+    private func busyBlock(height: CGFloat) -> some View {
+        HStack(spacing: 2) {
+            RoundedRectangle(cornerRadius: 1)
+                .fill(Color(nsColor: .systemGray).opacity(0.65))
+                .frame(width: 2)
+            if height >= 18 {
+                Text("Busy")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 2)
+        .padding(.vertical, 1)
+        .frame(height: height, alignment: .top)
+        .background(
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color(nsColor: .systemGray).opacity(0.11))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 3)
+                        .stroke(Color(nsColor: .systemGray).opacity(0.22), lineWidth: 0.5)
+                )
+        )
+    }
+
+    // MARK: Helpers
+
+    // Shared hairline views — using Color rather than Divider ensures exact 0.5pt sizing
+    private var hairline: some View {
+        Color(nsColor: .separatorColor).frame(height: 0.5)
+    }
+
+    private var vline: some View {
+        Color(nsColor: .separatorColor).frame(width: 0.5)
+    }
+
+    private func occurrencesForDay(_ day: Date) -> [CalendarEvent] {
+        sourceOccurrences.filter { Calendar.current.isDate($0.startDate, inSameDayAs: day) }
+    }
+
+    private func yPos(_ date: Date) -> CGFloat {
+        let c = Calendar.current
+        let h = c.component(.hour, from: date)
+        let m = c.component(.minute, from: date)
+        return CGFloat(max(0, Double(h - startHour) + Double(m) / 60.0)) * hourHeight
+    }
+
+    private func blockHeight(_ start: Date, _ end: Date) -> CGFloat {
+        CGFloat(end.timeIntervalSince(start) / 3600) * hourHeight
+    }
+
+    private func dayAbbrev(_ d: Date) -> String {
+        let f = DateFormatter(); f.dateFormat = "EEE"; return f.string(from: d).uppercased()
+    }
+
+    private func dayNum(_ d: Date) -> String {
+        let f = DateFormatter(); f.dateFormat = "d"; return f.string(from: d)
+    }
+
+    private func hourLabel(_ h: Int) -> String {
+        h == 12 ? "12 PM" : h > 12 ? "\(h-12) PM" : "\(h) AM"
+    }
+}
