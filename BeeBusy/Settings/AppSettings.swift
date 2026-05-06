@@ -1,5 +1,7 @@
 import Foundation
+import Observation
 
+@Observable
 final class AppSettings {
     private let defaults: UserDefaults
 
@@ -8,25 +10,51 @@ final class AppSettings {
     }
 
     var selectedCalendarIDs: [String] {
-        get { defaults.stringArray(forKey: "selectedCalendarIDs") ?? [] }
-        set { defaults.set(newValue, forKey: "selectedCalendarIDs") }
+        get {
+            access(keyPath: \.selectedCalendarIDs)
+            return defaults.stringArray(forKey: "selectedCalendarIDs") ?? []
+        }
+        set {
+            withMutation(keyPath: \.selectedCalendarIDs) {
+                defaults.set(newValue, forKey: "selectedCalendarIDs")
+            }
+        }
     }
 
     var lookForwardDays: Int {
         get {
+            access(keyPath: \.lookForwardDays)
             let v = defaults.integer(forKey: "lookForwardDays")
             return v == 0 ? 30 : v
         }
-        set { defaults.set(newValue, forKey: "lookForwardDays") }
+        set {
+            withMutation(keyPath: \.lookForwardDays) {
+                defaults.set(newValue, forKey: "lookForwardDays")
+            }
+        }
     }
 
     var launchAtLogin: Bool {
-        get { defaults.bool(forKey: "launchAtLogin") }
-        set { defaults.set(newValue, forKey: "launchAtLogin") }
+        get {
+            access(keyPath: \.launchAtLogin)
+            return defaults.bool(forKey: "launchAtLogin")
+        }
+        set {
+            withMutation(keyPath: \.launchAtLogin) {
+                defaults.set(newValue, forKey: "launchAtLogin")
+            }
+        }
     }
 
     var hasCompletedSetup: Bool {
-        get { defaults.bool(forKey: "hasCompletedSetup") }
-        set { defaults.set(newValue, forKey: "hasCompletedSetup") }
+        get {
+            access(keyPath: \.hasCompletedSetup)
+            return defaults.bool(forKey: "hasCompletedSetup")
+        }
+        set {
+            withMutation(keyPath: \.hasCompletedSetup) {
+                defaults.set(newValue, forKey: "hasCompletedSetup")
+            }
+        }
     }
 }

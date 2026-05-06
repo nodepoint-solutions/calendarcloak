@@ -41,16 +41,16 @@ final class SyncEngine {
         logger.info("Removed \(busyToDelete.count) Busy events from \(calendarID)")
     }
 
-    // MARK: - Dry run (read-only — returns plan without executing)
+    // MARK: - Dry run (read-only — returns plan + events without executing)
 
-    func dryRun() -> [ReconciliationOperation] {
-        let calendarIDs = settings.selectedCalendarIDs
-        guard !calendarIDs.isEmpty else { return [] }
+    func dryRun(calendarIDs: [String]) -> (operations: [ReconciliationOperation], events: [CalendarEvent]) {
+        guard !calendarIDs.isEmpty else { return ([], []) }
         let window = lookForwardWindow()
         let allEvents = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
         let (sources, busy) = partition(allEvents)
         let eligible = sources.filter { EventEligibility.isEligible($0) }
-        return reconcile(eligibleSources: eligible, busyEvents: busy, configuredCalendarIDs: calendarIDs)
+        let ops = reconcile(eligibleSources: eligible, busyEvents: busy, configuredCalendarIDs: calendarIDs)
+        return (ops, allEvents)
     }
 
     // MARK: - Private

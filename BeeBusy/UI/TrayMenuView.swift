@@ -2,7 +2,12 @@ import SwiftUI
 
 struct TrayMenuView: View {
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
     let state: AppState
+    let settings: AppSettings
+    let eventKitStore: EventKitStore
+    let engine: SyncEngine
+    let logger: Logger
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -16,6 +21,39 @@ struct TrayMenuView: View {
             }
             Divider()
             Button("Quit") { NSApplication.shared.terminate(nil) }
+        }
+        .task { await bootstrap() }
+    }
+
+    @MainActor
+    private func bootstrap() async {
+        do {
+            try await eventKitStore.requestAccess()
+            state.isAccessDenied = false
+            if settings.hasCompletedSetup {
+                engine.start()
+            } else {
+                openWindow(id: "setup")
+                NSApp.activate(ignoringOtherApps: true)
+            }
+        } catch {
+            state.isAccessDenied = true
+            logger.error("EventKit access denied: \(error)")
+            showAccessDeniedAlert()
+        }
+    }
+
+    private func showAccessDeniedAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Calendar Access Required"
+        alert.informativeText = "Bee Busy needs full calendar access to sync Busy events. Please grant access in System Settings → Privacy & Security → Calendars."
+        alert.addButton(withTitle: "Open System Settings")
+        alert.addButton(withTitle: "Quit")
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!)
+        } else {
+            NSApplication.shared.terminate(nil)
         }
     }
 
