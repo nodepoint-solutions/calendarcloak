@@ -75,6 +75,10 @@ Open Settings from the menu bar icon.
 
 **Look-forward window** — how many days ahead CalendarCloak looks when creating blocks. The default covers a few weeks; you can extend it up to 90 days.
 
+**Include all-day events** — whether all-day events are mirrored as Busy blocks. On by default; turn off if you don't want full-day entries (e.g. holidays or out-of-office markers) to appear as Busy in your other calendars.
+
+**Work hours filter** — when enabled, only events that start within the configured time window are mirrored. Use this to avoid creating Busy blocks for early-morning or late-evening events that don't affect your working day.
+
 **Launch at login** — keeps CalendarCloak running in the background whenever you log in.
 
 **Delete All Busy Events** — removes every Busy block from every calendar. Useful if you want to start fresh or stop using the app. If syncing is still active, the blocks will be recreated on the next calendar change.
