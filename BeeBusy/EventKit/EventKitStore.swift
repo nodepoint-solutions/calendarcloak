@@ -90,16 +90,22 @@ final class EventKitStore: CalendarStoreProtocol {
             logger.error("SAFETY: attempted to delete non-bee-busy event \(event.id) — aborted")
             return
         }
-        let ekEvent = ekEventCache[event.id]
-            ?? (store.calendarItem(withIdentifier: event.id) as? EKEvent)
+        // For recurring series, bypass the occurrence cache (which holds the last fetched occurrence)
+        // and use calendarItem(withIdentifier:) to get the master event. Removing the master with
+        // .futureEvents deletes the entire series; removing a later cached occurrence would only
+        // remove that tail, leaving earlier occurrences stranded and accumulating across syncs.
+        let ekEvent: EKEvent?
+        if event.isRecurring {
+            ekEvent = store.calendarItem(withIdentifier: event.id) as? EKEvent
+        } else {
+            ekEvent = ekEventCache[event.id]
+                ?? (store.calendarItem(withIdentifier: event.id) as? EKEvent)
+        }
         guard let ekEvent else {
             logger.warn("Could not find EKEvent for \(event.id) — already deleted?")
             return
         }
         do {
-            // For recurring Busy series, remove all occurrences from this point forward.
-            // Since we only ever create Busy events starting from today, this removes the whole series.
-            // For individual events, remove only this occurrence.
             let span: EKSpan = event.isRecurring ? .futureEvents : .thisEvent
             try store.remove(ekEvent, span: span, commit: true)
             logger.info("Deleted Busy event \(event.id) (recurring: \(event.isRecurring))")

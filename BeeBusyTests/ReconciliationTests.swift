@@ -149,4 +149,45 @@ final class ReconciliationTests: XCTestCase {
         XCTAssertTrue(creates.allSatisfy { $0.recurrenceCapDate == nil })
         XCTAssertEqual(creates.count, 1)
     }
+
+    // MARK: - Accumulated duplicate series cleanup
+
+    func test_multipleBusySeriesForSameSource_deletesAllAndRecreates() {
+        // Simulates state after Bug: incomplete deletions left multiple partial busy series
+        // for the same (sourceID, calID) pair
+        let src = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
+        let staleEnd = now.addingTimeInterval(10 * 86400)
+        let busyB_old = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                      end: now.addingTimeInterval(3600), seriesEndDate: staleEnd)
+        let busyB_newer = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                        end: now.addingTimeInterval(3600), seriesEndDate: staleEnd)
+
+        let ops = reconcile(eligibleSources: [src], busyEvents: [busyB_old, busyB_newer],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+
+        XCTAssertTrue(ops.contains(.delete(busyB_old)), "must delete first duplicate")
+        XCTAssertTrue(ops.contains(.delete(busyB_newer)), "must delete second duplicate")
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        XCTAssertEqual(creates.count, 1, "must recreate exactly one fresh series")
+        XCTAssertEqual(creates.first?.calendarID, calB)
+        XCTAssertEqual(creates.first?.recurrenceCapDate, windowEnd)
+    }
+
+    func test_multipleOrphanedBusySeries_deletesAll() {
+        // Multiple accumulated busy series for a source that no longer exists
+        let orphan1 = recurringBusy(sourceID: "gone", cal: calB, start: now,
+                                    end: now.addingTimeInterval(3600),
+                                    seriesEndDate: now.addingTimeInterval(10 * 86400))
+        let orphan2 = recurringBusy(sourceID: "gone", cal: calB,
+                                    start: now.addingTimeInterval(86400),
+                                    end: now.addingTimeInterval(86400 + 3600),
+                                    seriesEndDate: now.addingTimeInterval(20 * 86400))
+
+        let ops = reconcile(eligibleSources: [], busyEvents: [orphan1, orphan2],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+
+        XCTAssertTrue(ops.contains(.delete(orphan1)), "must delete first orphan")
+        XCTAssertTrue(ops.contains(.delete(orphan2)), "must delete second orphan")
+        XCTAssertEqual(ops.count, 2)
+    }
 }

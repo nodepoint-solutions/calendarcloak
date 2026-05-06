@@ -29,18 +29,14 @@ func reconcile(
 
     // --- Partition busy events: individual vs recurring series ---
 
-    // For series busy events: sourceID -> calendarID -> earliest occurrence (used for delete span)
-    var seriesBusy: [String: [String: CalendarEvent]] = [:]
+    // For series busy events: sourceID -> calendarID -> all series (may be >1 due to accumulated incomplete deletes)
+    var seriesBusy: [String: [String: [CalendarEvent]]] = [:]
     var individualBusy: [String: [CalendarEvent]] = [:]  // sourceID -> [CalendarEvent]
 
     for busy in busyEvents {
         guard let sid = BusyEventMarker.sourceID(from: busy.notes) else { continue }
         if busy.isRecurring {
-            if seriesBusy[sid] == nil { seriesBusy[sid] = [:] }
-            let existing = seriesBusy[sid]![busy.calendarID]
-            if existing == nil || busy.startDate < existing!.startDate {
-                seriesBusy[sid]![busy.calendarID] = busy
-            }
+            seriesBusy[sid, default: [:]][busy.calendarID, default: []].append(busy)
         } else {
             individualBusy[sid, default: []].append(busy)
         }
@@ -90,7 +86,15 @@ func reconcile(
         let targetCalIDs = configuredCalendarIDs.filter { $0 != anchor.calendarID }
 
         for calID in targetCalIDs {
-            if let existingBusy = seriesBusy[seriesID]?[calID] {
+            let existingList = seriesBusy[seriesID]?[calID] ?? []
+
+            if existingList.count > 1 {
+                // Multiple busy series accumulated from incomplete prior deletions — purge all and recreate clean
+                existingList.forEach { ops.append(.delete($0)) }
+                ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
+                                                  endDate: anchor.endDate, isAllDay: anchor.isAllDay,
+                                                  sourceID: seriesID, recurrenceCapDate: windowEnd)))
+            } else if let existingBusy = existingList.first {
                 let timingChanged = existingBusy.startDate != anchor.startDate
                     || existingBusy.endDate != anchor.endDate
                     || existingBusy.isAllDay != anchor.isAllDay
@@ -112,8 +116,8 @@ func reconcile(
 
         let targetSet = Set(targetCalIDs)
         if let calMap = seriesBusy[seriesID] {
-            for (calID, busy) in calMap where !targetSet.contains(calID) {
-                ops.append(.delete(busy))
+            for (calID, events) in calMap where !targetSet.contains(calID) {
+                events.forEach { ops.append(.delete($0)) }
             }
         }
     }
@@ -121,7 +125,9 @@ func reconcile(
     // Orphan cleanup for series
     let seriesSourceIDs = Set(seriesAnchors.keys)
     for (sid, calMap) in seriesBusy where !seriesSourceIDs.contains(sid) {
-        ops.append(contentsOf: calMap.values.map { .delete($0) })
+        for (_, events) in calMap {
+            ops.append(contentsOf: events.map { .delete($0) })
+        }
     }
 
     return ops

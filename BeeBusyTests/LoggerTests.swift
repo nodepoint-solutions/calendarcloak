@@ -52,7 +52,10 @@ final class LoggerTests: XCTestCase {
     }
 
     func test_rotation_triggeredWhenFileSizeExceeded() throws {
-        let smallLogger = Logger(fileURL: logFile, maxFileSizeBytes: 100)
+        // Each log line is ~90 bytes ([timestamp] [INFO] + 60 x's + newline).
+        // maxFileSizeBytes must be < 90 so the check before the second write sees the first line
+        // and triggers rotation (the check runs before writing, not after).
+        let smallLogger = Logger(fileURL: logFile, maxFileSizeBytes: 80)
         let longLine = String(repeating: "x", count: 60)
         smallLogger.info(longLine)
         smallLogger.info(longLine)  // should trigger rotation

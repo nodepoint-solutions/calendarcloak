@@ -8,7 +8,8 @@ final class SyncEngineTests: XCTestCase {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         defaults.set(30, forKey: "lookForwardDays")
         let settings = AppSettings(defaults: defaults)
-        return SyncEngine(store: store, settings: settings, state: AppState(), logger: Logger())
+        let logURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("bee-busy-test-\(UUID().uuidString).log")
+        return SyncEngine(store: store, settings: settings, state: AppState(), logger: Logger(fileURL: logURL))
     }
 
     private func busyEvent(id: String, calendarID: String) -> CalendarEvent {
