@@ -78,4 +78,58 @@ final class SyncEngineTests: XCTestCase {
         XCTAssertTrue(store.deletedEvents.isEmpty)
         XCTAssertEqual(store.fetchEventsCallCount, 0, "guard should prevent fetchEvents from being called")
     }
+
+    // MARK: - deleteLegacyBusyEvents
+
+    func test_deleteLegacyBusyEvents_deletesEventsWithOldPrefix() {
+        let store = MockCalendarStore()
+        store.stubbedCalendarIDs = ["calA"]
+        store.stubbedEvents = [
+            CalendarEvent(
+                id: "legacy1", calendarID: "calA", calendarName: "calA",
+                title: "Busy", startDate: Date(), endDate: Date().addingTimeInterval(3600),
+                isAllDay: false, notes: "bee-busy:source=OLD-ID-123", isAccepted: true
+            )
+        ]
+        let engine = makeEngine(store: store)
+
+        engine.deleteLegacyBusyEvents()
+
+        XCTAssertEqual(store.deletedEvents.count, 1)
+        XCTAssertEqual(store.deletedEvents.first?.id, "legacy1")
+    }
+
+    func test_deleteLegacyBusyEvents_doesNotDeleteNewPrefixEvents() {
+        let store = MockCalendarStore()
+        store.stubbedCalendarIDs = ["calA"]
+        store.stubbedEvents = [
+            CalendarEvent(
+                id: "new1", calendarID: "calA", calendarName: "calA",
+                title: "Busy", startDate: Date(), endDate: Date().addingTimeInterval(3600),
+                isAllDay: false, notes: "calendarcloak:source=NEW-ID-456", isAccepted: true
+            )
+        ]
+        let engine = makeEngine(store: store)
+
+        engine.deleteLegacyBusyEvents()
+
+        XCTAssertEqual(store.deletedEvents.count, 0)
+    }
+
+    func test_deleteLegacyBusyEvents_doesNotDeleteSourceEvents() {
+        let store = MockCalendarStore()
+        store.stubbedCalendarIDs = ["calA"]
+        store.stubbedEvents = [
+            CalendarEvent(
+                id: "src1", calendarID: "calA", calendarName: "calA",
+                title: "Team standup", startDate: Date(), endDate: Date().addingTimeInterval(3600),
+                isAllDay: false, notes: nil, isAccepted: true
+            )
+        ]
+        let engine = makeEngine(store: store)
+
+        engine.deleteLegacyBusyEvents()
+
+        XCTAssertEqual(store.deletedEvents.count, 0)
+    }
 }

@@ -21,6 +21,7 @@ final class AppCoordinator {
                 // covers the case where the user closed the wizard without finishing, or removed
                 // all calendars from Settings after initial setup.
                 if settings.hasCompletedSetup && settings.selectedCalendarIDs.count >= 2 {
+                    engine.deleteLegacyBusyEvents()
                     engine.start()
                     Task.detached(priority: .background) {
                         if let info = await checkForUpdate() {

@@ -54,6 +54,17 @@ final class SyncEngine {
         logger.info("Deleted \(busyToDelete.count) Busy events across all calendars")
     }
 
+    func deleteLegacyBusyEvents() {
+        let calendarIDs = store.fetchAllCalendarIDs()
+        guard !calendarIDs.isEmpty else { return }
+        let events = store.fetchEvents(calendarIDs: calendarIDs, start: .distantPast, end: .distantFuture)
+        let legacy = events.filter { BusyEventMarker.isLegacyBusyEvent($0) }
+        for event in legacy {
+            store.delete(event)
+        }
+        logger.info("Deleted \(legacy.count) legacy bee-busy events")
+    }
+
     // MARK: - Dry run (read-only — returns plan + events without executing)
 
     func dryRun(calendarIDs: [String]) -> (operations: [ReconciliationOperation], events: [CalendarEvent]) {
