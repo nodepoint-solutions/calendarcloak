@@ -1,0 +1,389 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9B04953584E31AD92E9BE90F /* BeeBusyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ABD797316B2A1ACF7C4F2E2 /* BeeBusyApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2BBD0EA004E14448B6C9A605 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6ED5348BB4DF1D23ED0F073C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BC1D447BEE549B62B6ABC360;
+			remoteInfo = BeeBusy;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		4ABD797316B2A1ACF7C4F2E2 /* BeeBusyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeeBusyApp.swift; sourceTree = "<group>"; };
+		91C563B1E32CFB70454946C8 /* BeeBusy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeeBusy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97C357E18BB5F062B0BFE3D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D20DFAB9161C947C51E7B9F6 /* BeeBusyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeeBusyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F74C285AA62F269F53F6FEF5 /* BeeBusy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeeBusy.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		31635CEC3D9127FEC1C80524 = {
+			isa = PBXGroup;
+			children = (
+				358D22E397BAC7AF00749484 /* BeeBusy */,
+				FA53FBAEE66CAC89A5112EBD /* BeeBusyTests */,
+				32F6E8A532773B4DD64F1497 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		32F6E8A532773B4DD64F1497 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				91C563B1E32CFB70454946C8 /* BeeBusy.app */,
+				D20DFAB9161C947C51E7B9F6 /* BeeBusyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		358D22E397BAC7AF00749484 /* BeeBusy */ = {
+			isa = PBXGroup;
+			children = (
+				F74C285AA62F269F53F6FEF5 /* BeeBusy.entitlements */,
+				4ABD797316B2A1ACF7C4F2E2 /* BeeBusyApp.swift */,
+				97C357E18BB5F062B0BFE3D4 /* Info.plist */,
+			);
+			path = BeeBusy;
+			sourceTree = "<group>";
+		};
+		FA53FBAEE66CAC89A5112EBD /* BeeBusyTests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = BeeBusyTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		49EFCC0B0BEAA3197E0E4E69 /* BeeBusyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA89709E2862E2BAC7CECDF1 /* Build configuration list for PBXNativeTarget "BeeBusyTests" */;
+			buildPhases = (
+				826374D6C3A11AEE1EB96F7E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D676AA120E0B18D7D15BE34C /* PBXTargetDependency */,
+			);
+			name = BeeBusyTests;
+			packageProductDependencies = (
+			);
+			productName = BeeBusyTests;
+			productReference = D20DFAB9161C947C51E7B9F6 /* BeeBusyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BC1D447BEE549B62B6ABC360 /* BeeBusy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A3536B4EC8F1C5F4CD139EAA /* Build configuration list for PBXNativeTarget "BeeBusy" */;
+			buildPhases = (
+				3F14456E2DC38B18B440107D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BeeBusy;
+			packageProductDependencies = (
+			);
+			productName = BeeBusy;
+			productReference = 91C563B1E32CFB70454946C8 /* BeeBusy.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6ED5348BB4DF1D23ED0F073C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = AB2550E81A86C22200EC1F75 /* Build configuration list for PBXProject "BeeBusy" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 31635CEC3D9127FEC1C80524;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 32F6E8A532773B4DD64F1497 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BC1D447BEE549B62B6ABC360 /* BeeBusy */,
+				49EFCC0B0BEAA3197E0E4E69 /* BeeBusyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3F14456E2DC38B18B440107D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B04953584E31AD92E9BE90F /* BeeBusyApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		826374D6C3A11AEE1EB96F7E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D676AA120E0B18D7D15BE34C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BC1D447BEE549B62B6ABC360 /* BeeBusy */;
+			targetProxy = 2BBD0EA004E14448B6C9A605 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		517ADB935A4EA1B2002CD3BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = BeeBusy/BeeBusy.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = BeeBusy/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nodepoint.bee-busy";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5194E6BAF183F33E9D529B07 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		78709244795A81950E6E33C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A19AD9A72581D8C1BC60CEAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nodepoint.bee-busy-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BeeBusy.app/Contents/MacOS/BeeBusy";
+			};
+			name = Debug;
+		};
+		B45B286AE228164B04D5F1F9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = BeeBusy/BeeBusy.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = BeeBusy/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nodepoint.bee-busy";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		DC05BD4DDB82DF6D3F577399 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nodepoint.bee-busy-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BeeBusy.app/Contents/MacOS/BeeBusy";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A3536B4EC8F1C5F4CD139EAA /* Build configuration list for PBXNativeTarget "BeeBusy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				517ADB935A4EA1B2002CD3BE /* Debug */,
+				B45B286AE228164B04D5F1F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AB2550E81A86C22200EC1F75 /* Build configuration list for PBXProject "BeeBusy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78709244795A81950E6E33C1 /* Debug */,
+				5194E6BAF183F33E9D529B07 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DA89709E2862E2BAC7CECDF1 /* Build configuration list for PBXNativeTarget "BeeBusyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A19AD9A72581D8C1BC60CEAF /* Debug */,
+				DC05BD4DDB82DF6D3F577399 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6ED5348BB4DF1D23ED0F073C /* Project object */;
+}

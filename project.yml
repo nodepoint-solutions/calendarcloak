@@ -1,0 +1,31 @@
+name: BeeBusy
+options:
+  bundleIdPrefix: com.nodepoint
+  deploymentTarget:
+    macOS: "26.0"
+targets:
+  BeeBusy:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: BeeBusy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.bee-busy
+        SWIFT_VERSION: 5.0
+        INFOPLIST_FILE: BeeBusy/Info.plist
+        CODE_SIGN_ENTITLEMENTS: BeeBusy/BeeBusy.entitlements
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+  BeeBusyTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: BeeBusyTests
+    dependencies:
+      - target: BeeBusy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.bee-busy-tests
