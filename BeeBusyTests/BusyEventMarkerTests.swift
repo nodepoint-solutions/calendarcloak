@@ -1,0 +1,41 @@
+import XCTest
+@testable import BeeBusy
+
+final class BusyEventMarkerTests: XCTestCase {
+
+    func test_notes_containsPrefix() {
+        let notes = BusyEventMarker.notes(for: "abc123")
+        XCTAssertEqual(notes, "bee-busy:source=abc123")
+    }
+
+    func test_sourceID_extractsFromValidNotes() {
+        let notes = "bee-busy:source=abc123"
+        XCTAssertEqual(BusyEventMarker.sourceID(from: notes), "abc123")
+    }
+
+    func test_sourceID_returnsNilForNonBusyNotes() {
+        XCTAssertNil(BusyEventMarker.sourceID(from: "just a regular note"))
+    }
+
+    func test_sourceID_returnsNilForNilNotes() {
+        XCTAssertNil(BusyEventMarker.sourceID(from: nil))
+    }
+
+    func test_isBusyEvent_trueWhenMarkerPresent() {
+        let event = CalendarEvent(
+            id: "id1", calendarID: "cal1", calendarName: "Work",
+            title: "Busy", startDate: Date(), endDate: Date(),
+            isAllDay: false, notes: "bee-busy:source=abc123", isAccepted: true
+        )
+        XCTAssertTrue(BusyEventMarker.isBusyEvent(event))
+    }
+
+    func test_isBusyEvent_falseWhenNoMarker() {
+        let event = CalendarEvent(
+            id: "id2", calendarID: "cal1", calendarName: "Work",
+            title: "Team standup", startDate: Date(), endDate: Date(),
+            isAllDay: false, notes: nil, isAccepted: true
+        )
+        XCTAssertFalse(BusyEventMarker.isBusyEvent(event))
+    }
+}
