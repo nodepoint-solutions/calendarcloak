@@ -51,10 +51,14 @@ struct TrayMenuView: View {
         state.isAccessDenied ? "Calendar access denied" : "Active"
     }
 
+    private static let relativeDateFormatter: RelativeDateTimeFormatter = {
+        let f = RelativeDateTimeFormatter()
+        f.unitsStyle = .full
+        return f
+    }()
+
     private var lastSyncLabel: String {
         guard let date = state.lastSyncDate else { return "Last sync: Never" }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return "Last sync: \(formatter.localizedString(for: date, relativeTo: Date()))"
+        return "Last sync: \(Self.relativeDateFormatter.localizedString(for: date, relativeTo: Date()))"
     }
 }
