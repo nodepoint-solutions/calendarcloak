@@ -7,6 +7,10 @@ struct TrayMenuView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             statusSection
+            if state.updateState != .idle {
+                Divider()
+                updateSection
+            }
             Divider()
             Button("Settings...") {
                 NSApp.activate(ignoringOtherApps: true)
@@ -15,6 +19,42 @@ struct TrayMenuView: View {
             Divider()
             Button("Quit") { NSApplication.shared.terminate(nil) }
         }
+    }
+
+    @ViewBuilder
+    private var updateSection: some View {
+        switch state.updateState {
+        case .idle:
+            EmptyView()
+        case let .available(version, dmgURL):
+            Button("Update to \(version)") {
+                Task.detached {
+                    do {
+                        try await installUpdate(dmgURL: dmgURL) { newState in
+                            await MainActor.run { state.updateState = newState }
+                        }
+                    } catch {
+                        await MainActor.run {
+                            state.updateState = .available(version: version, dmgURL: dmgURL)
+                        }
+                    }
+                }
+            }
+        case let .downloading(pct):
+            updateStatusText("Downloading… \(Int(pct * 100))%")
+        case .installing:
+            updateStatusText("Installing…")
+        case .restarting:
+            updateStatusText("Restarting…")
+        }
+    }
+
+    private func updateStatusText(_ text: String) -> some View {
+        Text(text)
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
     }
 
     private var statusSection: some View {
