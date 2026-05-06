@@ -8,7 +8,7 @@ final class UpdateInstallerTests: XCTestCase {
         XCTAssertEqual(parseMountPoint(from: output), "/Volumes/CalendarCloak 1.2.3")
     }
 
-    func test_parseMountPoint_multipleLines_returnsFirstVolume() {
+    func test_parseMountPoint_skipsNonVolumeLines_returnsFirstMatch() {
         let output = "/dev/disk4s1\tApple_partition_scheme\t\n/dev/disk4s2\tApple_HFS\t/Volumes/MyApp\n"
         XCTAssertEqual(parseMountPoint(from: output), "/Volumes/MyApp")
     }

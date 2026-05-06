@@ -2,7 +2,6 @@ import Foundation
 import AppKit
 
 enum UpdateError: Error {
-    case downloadFailed
     case mountFailed(String)
     case noAppBundle
     case processFailure(String, Int32, String)
@@ -80,7 +79,7 @@ func installUpdate(dmgURL: URL, onProgress: @escaping (UpdateState) async -> Voi
     await MainActor.run { NSApplication.shared.terminate(nil) }
 }
 
-// MARK: - Internal helpers (internal for testability)
+// MARK: - Internal helpers
 
 func parseMountPoint(from output: String) -> String? {
     for line in output.components(separatedBy: "\n") {
