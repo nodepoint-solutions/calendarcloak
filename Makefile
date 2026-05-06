@@ -1,7 +1,7 @@
 export DEVELOPER_DIR := /Applications/Xcode.app/Contents/Developer
 XCODEBUILD := xcodebuild
-PROJECT    := BeeBusy.xcodeproj
-SCHEME     := BeeBusy
+PROJECT    := CalendarCloak.xcodeproj
+SCHEME     := CalendarCloak
 DERIVED    := .build/DerivedData
 
 BUILD_FLAGS := \
@@ -24,7 +24,7 @@ build: generate
 	@grep -q 'BUILD SUCCEEDED' /tmp/xcodebuild.log
 
 run: build
-	open $(DERIVED)/Build/Products/Debug/BeeBusy.app
+	open $(DERIVED)/Build/Products/Debug/CalendarCloak.app
 
 test:
 	$(XCODEBUILD) test $(BUILD_FLAGS) 2>&1 | \

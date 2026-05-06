@@ -39,7 +39,7 @@ struct SetupWizardView: View {
                 Text("🐝").font(.system(size: 26))
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text("Bee Busy").font(.title2).bold()
+                Text("CalendarCloak").font(.title2).bold()
                 Text(step == .selectCalendars
                      ? "Select calendars to keep in sync"
                      : "Preview — Busy blocks that will be created")
@@ -229,7 +229,7 @@ struct SetupWizardView: View {
         VStack(spacing: 10) {
             Image(systemName: "calendar.badge.checkmark").font(.system(size: 36)).foregroundStyle(.secondary)
             Text("No upcoming events in the sync window").font(.subheadline).foregroundStyle(.secondary)
-            Text("Bee Busy will sync events as they appear.").font(.caption).foregroundStyle(.tertiary)
+            Text("CalendarCloak will sync events as they appear.").font(.caption).foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, minHeight: 220)
     }
@@ -240,7 +240,7 @@ struct SetupWizardView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.large)
             Spacer()
-            Button("Activate Bee Busy") {
+            Button("Activate CalendarCloak") {
                 settings.selectedCalendarIDs = Array(selectedIDs)
                 settings.hasCompletedSetup = true
                 engine.start()

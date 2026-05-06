@@ -32,10 +32,10 @@ jobs:
       - name: Build archive
         run: |
           xcodebuild archive \
-            -project BeeBusy.xcodeproj \
-            -scheme BeeBusy \
+            -project CalendarCloak.xcodeproj \
+            -scheme CalendarCloak \
             -configuration Release \
-            -archivePath build/BeeBusy-${{ matrix.arch }}.xcarchive \
+            -archivePath build/CalendarCloak-${{ matrix.arch }}.xcarchive \
             ARCHS=${{ matrix.arch }} \
             ONLY_ACTIVE_ARCH=NO \
             CODE_SIGN_IDENTITY="" \
@@ -45,29 +45,29 @@ jobs:
       - name: Export app
         run: |
           xcodebuild -exportArchive \
-            -archivePath build/BeeBusy-${{ matrix.arch }}.xcarchive \
+            -archivePath build/CalendarCloak-${{ matrix.arch }}.xcarchive \
             -exportPath build/export-${{ matrix.arch }} \
             -exportOptionsPlist ExportOptions.plist
 
       - name: Ad-hoc codesign
         run: |
           codesign --sign - --deep --force --options runtime \
-            build/export-${{ matrix.arch }}/BeeBusy.app
+            build/export-${{ matrix.arch }}/CalendarCloak.app
 
       - name: Package as DMG
         run: |
           hdiutil create \
-            -volname "Bee Busy" \
-            -srcfolder build/export-${{ matrix.arch }}/BeeBusy.app \
+            -volname "CalendarCloak" \
+            -srcfolder build/export-${{ matrix.arch }}/CalendarCloak.app \
             -ov \
             -format UDZO \
-            build/BeeBusy-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
+            build/CalendarCloak-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BeeBusy-${{ matrix.arch }}
-          path: build/BeeBusy-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
+          name: CalendarCloak-${{ matrix.arch }}
+          path: build/CalendarCloak-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
 
   release:
     name: Create Release
@@ -78,12 +78,12 @@ jobs:
       - name: Download arm64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: BeeBusy-arm64
+          name: CalendarCloak-arm64
 
       - name: Download x86_64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: BeeBusy-x86_64
+          name: CalendarCloak-x86_64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

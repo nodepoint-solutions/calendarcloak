@@ -69,7 +69,7 @@ struct SettingsView: View {
                 Button("View Logs") {
                     let logsURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)
                         .first!
-                        .appendingPathComponent("Logs/BeeBusy/bee-busy.log")
+                        .appendingPathComponent("Logs/CalendarCloak/calendar-cloak.log")
                     NSWorkspace.shared.open(logsURL)
                 }
 

@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct BeeBusyApp: App {
+struct CalendarCloakApp: App {
     private let logger: Logger = {
         let logsURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)
             .first!
-            .appendingPathComponent("Logs/BeeBusy/bee-busy.log")
+            .appendingPathComponent("Logs/CalendarCloak/calendar-cloak.log")
         return Logger(fileURL: logsURL)
     }()
 
@@ -29,7 +29,7 @@ struct BeeBusyApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra("Bee Busy", systemImage: "calendar.badge.clock") {
+        MenuBarExtra("CalendarCloak", systemImage: "calendar.badge.clock") {
             TrayMenuView(state: state)
         }
 

@@ -4,7 +4,7 @@ final class Logger {
     private let fileURL: URL
     private let maxFileSizeBytes: Int
     private let dateFormatter: DateFormatter
-    private let queue = DispatchQueue(label: "com.nodepoint.bee-busy.logger", qos: .utility)
+    private let queue = DispatchQueue(label: "com.nodepoint.calendar-cloak.logger", qos: .utility)
 
     init(fileURL: URL, maxFileSizeBytes: Int = 5 * 1024 * 1024) {
         self.fileURL = fileURL

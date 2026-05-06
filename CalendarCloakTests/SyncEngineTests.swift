@@ -1,5 +1,5 @@
 import XCTest
-@testable import BeeBusy
+@testable import CalendarCloak
 
 @MainActor
 final class SyncEngineTests: XCTestCase {

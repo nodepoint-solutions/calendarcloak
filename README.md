@@ -1,4 +1,4 @@
-# Bee Busy
+# CalendarCloak
 
 A macOS menu bar app that keeps your calendars in sync — without sharing your event details.
 
@@ -19,7 +19,7 @@ If you have more than one calendar — a personal one and a work one, for exampl
 
 The usual workaround is to manually duplicate events across calendars, which is tedious and means sharing event titles and details you might not want to share.
 
-Bee Busy solves this by watching your selected calendars and creating anonymous **Busy** blocks in each one whenever you have an event in another. The blocks show only the time — no titles, locations, or descriptions are ever copied.
+CalendarCloak solves this by watching your selected calendars and creating anonymous **Busy** blocks in each one whenever you have an event in another. The blocks show only the time — no titles, locations, or descriptions are ever copied.
 
 ---
 
@@ -27,14 +27,14 @@ Bee Busy solves this by watching your selected calendars and creating anonymous 
 
 Download the latest release from the [Releases](../../releases/latest) page.
 
-Open the `.dmg`, drag **Bee Busy** to your Applications folder, and launch it.
+Open the `.dmg`, drag **CalendarCloak** to your Applications folder, and launch it.
 
 ### macOS security prompt
 
-Bee Busy is not notarised. macOS may refuse to open it, or say the app is damaged. If that happens, run this in Terminal:
+CalendarCloak is not notarised. macOS may refuse to open it, or say the app is damaged. If that happens, run this in Terminal:
 
 ```bash
-xattr -cr /Applications/Bee\ Busy.app
+xattr -cr /Applications/CalendarCloak.app
 ```
 
 Then try launching again. If macOS still blocks it, go to **System Settings → Privacy & Security** and click **Open Anyway**.
@@ -45,9 +45,9 @@ Then try launching again. If macOS still blocks it, go to **System Settings → 
 
 On first launch, a setup wizard walks you through picking which calendars to keep in sync. You need at least two.
 
-Once you've chosen, Bee Busy shows a preview of the Busy blocks it would create for your upcoming events, so you can see exactly what will happen before committing. Click **Activate Bee Busy** and it starts running in the background.
+Once you've chosen, CalendarCloak shows a preview of the Busy blocks it would create for your upcoming events, so you can see exactly what will happen before committing. Click **Activate CalendarCloak** and it starts running in the background.
 
-From then on, Bee Busy watches for calendar changes and updates your Busy blocks automatically. It only looks at events you've accepted — declined or tentative invitations are ignored.
+From then on, CalendarCloak watches for calendar changes and updates your Busy blocks automatically. It only looks at events you've accepted — declined or tentative invitations are ignored.
 
 The app lives in your menu bar. It has no Dock icon and no windows open unless you need to change settings.
 
@@ -59,8 +59,8 @@ Open Settings from the menu bar icon.
 
 **Calendars** — add or remove calendars from the sync at any time. Removing a calendar also removes the Busy blocks it was providing to the others.
 
-**Look-forward window** — how many days ahead Bee Busy looks when creating blocks. The default covers a few weeks; you can extend it up to 90 days.
+**Look-forward window** — how many days ahead CalendarCloak looks when creating blocks. The default covers a few weeks; you can extend it up to 90 days.
 
-**Launch at login** — keeps Bee Busy running in the background whenever you log in.
+**Launch at login** — keeps CalendarCloak running in the background whenever you log in.
 
 **Delete All Busy Events** — removes every Busy block from every calendar. Useful if you want to start fresh or stop using the app. If syncing is still active, the blocks will be recreated on the next calendar change.

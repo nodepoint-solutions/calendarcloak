@@ -46,7 +46,7 @@ final class AppCoordinator {
         )
         let hosting = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: hosting)
-        window.title = "Set Up Bee Busy"
+        window.title = "Set Up CalendarCloak"
         window.styleMask = [.titled, .closable]
         window.setContentSize(NSSize(width: 520, height: 560))
         window.center()
@@ -60,7 +60,7 @@ final class AppCoordinator {
     private func showAccessDeniedAlert() {
         let alert = NSAlert()
         alert.messageText = "Calendar Access Required"
-        alert.informativeText = "Bee Busy needs full calendar access. Please grant access in System Settings → Privacy & Security → Calendars."
+        alert.informativeText = "CalendarCloak needs full calendar access. Please grant access in System Settings → Privacy & Security → Calendars."
         alert.addButton(withTitle: "Open System Settings")
         alert.addButton(withTitle: "Quit")
         let response = alert.runModal()

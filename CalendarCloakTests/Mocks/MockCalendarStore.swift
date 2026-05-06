@@ -1,6 +1,6 @@
 import EventKit
 import Foundation
-@testable import BeeBusy
+@testable import CalendarCloak
 
 final class MockCalendarStore: CalendarStoreProtocol {
     var stubbedCalendars: [EKCalendar] = []

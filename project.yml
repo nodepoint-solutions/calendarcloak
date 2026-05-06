@@ -1,32 +1,32 @@
-name: BeeBusy
+name: CalendarCloak
 options:
   bundleIdPrefix: com.nodepoint
   deploymentTarget:
     macOS: "26.0"
   createIntermediateGroups: true
 targets:
-  BeeBusy:
+  CalendarCloak:
     type: application
     platform: macOS
     deploymentTarget: "26.0"
     sources:
-      - path: BeeBusy
+      - path: CalendarCloak
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.bee-busy
+        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.calendar-cloak
         SWIFT_VERSION: 5.0
-        INFOPLIST_FILE: BeeBusy/Info.plist
-        CODE_SIGN_ENTITLEMENTS: BeeBusy/BeeBusy.entitlements
+        INFOPLIST_FILE: CalendarCloak/Info.plist
+        CODE_SIGN_ENTITLEMENTS: CalendarCloak/CalendarCloak.entitlements
         MARKETING_VERSION: 0.1.0
         CURRENT_PROJECT_VERSION: 1
-  BeeBusyTests:
+  CalendarCloakTests:
     type: bundle.unit-test
     platform: macOS
     deploymentTarget: "26.0"
     sources:
-      - path: BeeBusyTests
+      - path: CalendarCloakTests
     dependencies:
-      - target: BeeBusy
+      - target: CalendarCloak
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.bee-busy-tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.nodepoint.calendar-cloak-tests

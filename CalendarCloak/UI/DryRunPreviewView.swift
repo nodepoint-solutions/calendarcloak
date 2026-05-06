@@ -101,7 +101,7 @@ struct DryRunPreviewView: View {
     }
 
     private var noticeBox: some View {
-        Text("This preview is shown once. After activating, Bee Busy runs silently in the background — no further prompts.")
+        Text("This preview is shown once. After activating, CalendarCloak runs silently in the background — no further prompts.")
             .font(.callout)
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
