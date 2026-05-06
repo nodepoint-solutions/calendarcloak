@@ -8,8 +8,6 @@ struct TrayMenuView: View {
         VStack(alignment: .leading, spacing: 0) {
             statusSection
             Divider()
-            calendarSection
-            Divider()
             Button("Settings...") {
                 NSApp.activate(ignoringOtherApps: true)
                 openSettings()
@@ -28,34 +26,19 @@ struct TrayMenuView: View {
                 Text(statusLabel)
                     .font(.callout)
             }
-            Text(lastSyncLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            if !state.activeCalendarNames.isEmpty {
+                Text("Watching \(state.activeCalendarNames.count) calendar\(state.activeCalendarNames.count == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            TimelineView(.everyMinute) { _ in
+                Text(lastSyncLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-    }
-
-    private var calendarSection: some View {
-        Group {
-            if !state.activeCalendarNames.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("SYNCED CALENDARS")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.top, 6)
-                    ForEach(state.activeCalendarNames, id: \.self) { name in
-                        Label(name, systemImage: "calendar")
-                            .font(.callout)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 3)
-                    }
-                }
-                .padding(.bottom, 6)
-                Divider()
-            }
-        }
     }
 
     private var statusColor: Color {
