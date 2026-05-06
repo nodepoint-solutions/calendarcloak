@@ -25,7 +25,7 @@ final class EventKitStore: CalendarStoreProtocol {
     }
 
     func fetchCalendars() -> [EKCalendar] {
-        store.calendars(for: .event).filter { $0.type != .subscription && $0.type != .birthday }
+        store.calendars(for: .event).filter { $0.allowsContentModifications }
     }
 
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent] {
