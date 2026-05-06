@@ -41,10 +41,9 @@ jobs:
 
       - name: Export app
         run: |
-          xcodebuild -exportArchive \
-            -archivePath build/CalendarCloak-arm64.xcarchive \
-            -exportPath build/export-arm64 \
-            -exportOptionsPlist ExportOptions.plist
+          mkdir -p build/export-arm64
+          cp -R build/CalendarCloak-arm64.xcarchive/Products/Applications/CalendarCloak.app \
+            build/export-arm64/
 
       - name: Ad-hoc codesign
         run: |
