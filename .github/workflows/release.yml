@@ -10,11 +10,8 @@ permissions:
 
 jobs:
   build:
-    name: Build (${{ matrix.arch }})
+    name: Build (arm64)
     runs-on: macos-15
-    strategy:
-      matrix:
-        arch: [arm64, x86_64]
 
     steps:
       - name: Checkout
@@ -35,8 +32,8 @@ jobs:
             -project CalendarCloak.xcodeproj \
             -scheme CalendarCloak \
             -configuration Release \
-            -archivePath build/CalendarCloak-${{ matrix.arch }}.xcarchive \
-            ARCHS=${{ matrix.arch }} \
+            -archivePath build/CalendarCloak-arm64.xcarchive \
+            ARCHS=arm64 \
             ONLY_ACTIVE_ARCH=NO \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -45,29 +42,29 @@ jobs:
       - name: Export app
         run: |
           xcodebuild -exportArchive \
-            -archivePath build/CalendarCloak-${{ matrix.arch }}.xcarchive \
-            -exportPath build/export-${{ matrix.arch }} \
+            -archivePath build/CalendarCloak-arm64.xcarchive \
+            -exportPath build/export-arm64 \
             -exportOptionsPlist ExportOptions.plist
 
       - name: Ad-hoc codesign
         run: |
           codesign --sign - --deep --force --options runtime \
-            build/export-${{ matrix.arch }}/CalendarCloak.app
+            build/export-arm64/CalendarCloak.app
 
       - name: Package as DMG
         run: |
           hdiutil create \
             -volname "CalendarCloak" \
-            -srcfolder build/export-${{ matrix.arch }}/CalendarCloak.app \
+            -srcfolder build/export-arm64/CalendarCloak.app \
             -ov \
             -format UDZO \
-            build/CalendarCloak-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
+            build/CalendarCloak-${{ steps.version.outputs.version }}-arm64.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CalendarCloak-${{ matrix.arch }}
-          path: build/CalendarCloak-${{ steps.version.outputs.version }}-${{ matrix.arch }}.dmg
+          name: CalendarCloak-arm64
+          path: build/CalendarCloak-${{ steps.version.outputs.version }}-arm64.dmg
 
   release:
     name: Create Release
@@ -79,11 +76,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: CalendarCloak-arm64
-
-      - name: Download x86_64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: CalendarCloak-x86_64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
