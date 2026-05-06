@@ -72,6 +72,7 @@ final class EventKitStore: CalendarStoreProtocol {
         event.endDate = draft.endDate
         event.isAllDay = draft.isAllDay
         event.calendar = calendar
+        event.alarms = nil
 
         if let capDate = draft.recurrenceCapDate,
            let sourceRules = ekEventCache[draft.sourceID]?.recurrenceRules,
