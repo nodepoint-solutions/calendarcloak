@@ -10,7 +10,10 @@ struct TrayMenuView: View {
             Divider()
             calendarSection
             Divider()
-            Button("Settings...") { openSettings() }
+            Button("Settings...") {
+                NSApp.activate(ignoringOtherApps: true)
+                openSettings()
+            }
             Divider()
             Button("Quit") { NSApplication.shared.terminate(nil) }
         }
