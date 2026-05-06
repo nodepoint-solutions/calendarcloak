@@ -1,11 +1,19 @@
 import Foundation
 
 enum EventEligibility {
-    /// Returns true if the event should be mirrored as a Busy block in other calendars.
-    /// Rejects events the user has not explicitly accepted, and rejects our own Busy events
-    /// as a belt-and-suspenders guard against recursive syncing.
-    static func isEligible(_ event: CalendarEvent) -> Bool {
+    static func isEligible(_ event: CalendarEvent, settings: AppSettings) -> Bool {
         guard !BusyEventMarker.isBusyEvent(event) else { return false }
-        return event.isAccepted
+        guard event.isAccepted else { return false }
+
+        if event.isAllDay {
+            return settings.includeAllDayEvents
+        }
+
+        if settings.workHoursEnabled {
+            let hour = Calendar.current.component(.hour, from: event.startDate)
+            guard hour >= settings.workHoursStart && hour < settings.workHoursEnd else { return false }
+        }
+
+        return true
     }
 }

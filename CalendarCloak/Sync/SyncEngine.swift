@@ -61,7 +61,7 @@ final class SyncEngine {
         let window = lookForwardWindow()
         let allEvents = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
         let (sources, busy) = partition(allEvents)
-        let eligible = sources.filter { EventEligibility.isEligible($0) }
+        let eligible = sources.filter { EventEligibility.isEligible($0, settings: settings) }
         let ops = reconcile(eligibleSources: eligible, busyEvents: busy,
                             configuredCalendarIDs: calendarIDs, windowEnd: window.end)
         return (ops, allEvents)
@@ -96,7 +96,7 @@ final class SyncEngine {
         let window = lookForwardWindow()
         let allEvents = store.fetchEvents(calendarIDs: calendarIDs, start: window.start, end: window.end)
         let (sources, busy) = partition(allEvents)
-        let eligible = sources.filter { EventEligibility.isEligible($0) }
+        let eligible = sources.filter { EventEligibility.isEligible($0, settings: settings) }
         let operations = reconcile(eligibleSources: eligible, busyEvents: busy,
                                    configuredCalendarIDs: calendarIDs, windowEnd: window.end,
                                    logger: logger)
