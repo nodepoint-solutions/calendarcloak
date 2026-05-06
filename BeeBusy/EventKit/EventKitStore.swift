@@ -4,6 +4,7 @@ import Foundation
 protocol CalendarStoreProtocol: AnyObject {
     func requestAccess() async throws
     func fetchCalendars() -> [EKCalendar]
+    func fetchAllCalendarIDs() -> [String]
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent]
     func create(_ draft: BusyEventDraft) throws
     func delete(_ event: CalendarEvent)
@@ -26,6 +27,12 @@ final class EventKitStore: CalendarStoreProtocol {
 
     func fetchCalendars() -> [EKCalendar] {
         store.calendars(for: .event).filter { $0.allowsContentModifications }
+    }
+
+    func fetchAllCalendarIDs() -> [String] {
+        store.calendars(for: .event)
+            .filter { $0.allowsContentModifications }
+            .map { $0.calendarIdentifier }
     }
 
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent] {

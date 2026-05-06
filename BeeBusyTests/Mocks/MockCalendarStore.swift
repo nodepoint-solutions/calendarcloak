@@ -4,6 +4,7 @@ import Foundation
 
 final class MockCalendarStore: CalendarStoreProtocol {
     var stubbedCalendars: [EKCalendar] = []
+    var stubbedCalendarIDs: [String] = []
     var stubbedEvents: [CalendarEvent] = []
     var createdDrafts: [BusyEventDraft] = []
     var deletedEvents: [CalendarEvent] = []
@@ -15,6 +16,10 @@ final class MockCalendarStore: CalendarStoreProtocol {
 
     func fetchCalendars() -> [EKCalendar] {
         stubbedCalendars
+    }
+
+    func fetchAllCalendarIDs() -> [String] {
+        stubbedCalendarIDs
     }
 
     func fetchEvents(calendarIDs: [String], start: Date, end: Date) -> [CalendarEvent] {
