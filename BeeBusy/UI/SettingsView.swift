@@ -9,21 +9,31 @@ struct SettingsView: View {
     let logger: Logger
     let engine: SyncEngine
 
+    private var calendarsBySource: [(sourceTitle: String, calendars: [EKCalendar])] {
+        let grouped = Dictionary(grouping: calendars) { $0.source?.title ?? "Other" }
+        return grouped.map { (sourceTitle: $0.key, calendars: $0.value.sorted { $0.title < $1.title }) }
+            .sorted { $0.sourceTitle < $1.sourceTitle }
+    }
+
     var body: some View {
         Form {
-            Section("Calendars") {
-                if calendars.isEmpty {
+            if calendars.isEmpty {
+                Section("Calendars") {
                     Text("No calendars available")
                         .foregroundStyle(.secondary)
-                } else {
-                    ForEach(calendars, id: \.calendarIdentifier) { calendar in
-                        Toggle(isOn: bindingFor(calendar)) {
-                            Label {
-                                Text(calendar.title)
-                            } icon: {
-                                Circle()
-                                    .fill(Color(cgColor: calendar.cgColor))
-                                    .frame(width: 10, height: 10)
+                }
+            } else {
+                ForEach(calendarsBySource, id: \.sourceTitle) { group in
+                    Section(group.sourceTitle) {
+                        ForEach(group.calendars, id: \.calendarIdentifier) { calendar in
+                            Toggle(isOn: bindingFor(calendar)) {
+                                Label {
+                                    Text(calendar.title)
+                                } icon: {
+                                    Circle()
+                                        .fill(Color(cgColor: calendar.cgColor))
+                                        .frame(width: 10, height: 10)
+                                }
                             }
                         }
                     }
