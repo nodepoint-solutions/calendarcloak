@@ -27,7 +27,7 @@ func checkForUpdate() async -> UpdateInfo? {
         let current = parseSemver(currentVersion)
     else { return nil }
 
-    let url = URL(string: "https://api.github.com/repos/nodepoint-solutions/calendarcloak/releases/latest")!
+    guard let url = URL(string: "https://api.github.com/repos/nodepoint-solutions/calendarcloak/releases/latest") else { return nil }
     var request = URLRequest(url: url)
     request.setValue("CalendarCloak-app", forHTTPHeaderField: "User-Agent")
     request.timeoutInterval = 10
@@ -36,7 +36,7 @@ func checkForUpdate() async -> UpdateInfo? {
         let (data, _) = try await URLSession.shared.data(for: request)
         let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
 
-        guard let latest = parseSemver(release.tag_name), isNewer(latest, than: current) else {
+        guard let latest = parseSemver(release.tagName), isNewer(latest, than: current) else {
             return nil
         }
 
@@ -49,10 +49,10 @@ func checkForUpdate() async -> UpdateInfo? {
         let dmgAsset = release.assets.first { $0.name.contains(archSuffix) && $0.name.hasSuffix(".dmg") }
                     ?? release.assets.first { $0.name.hasSuffix(".dmg") }
 
-        guard let asset = dmgAsset, let dmgURL = URL(string: asset.browser_download_url) else {
+        guard let asset = dmgAsset, let dmgURL = URL(string: asset.browserDownloadURL) else {
             return nil
         }
-        return UpdateInfo(version: release.tag_name, dmgURL: dmgURL)
+        return UpdateInfo(version: release.tagName, dmgURL: dmgURL)
     } catch {
         return nil
     }
@@ -62,11 +62,21 @@ func checkForUpdate() async -> UpdateInfo? {
 // MARK: - Private
 
 private struct GitHubRelease: Decodable {
-    let tag_name: String
+    let tagName: String
     let assets: [Asset]
+
+    enum CodingKeys: String, CodingKey {
+        case tagName = "tag_name"
+        case assets
+    }
 
     struct Asset: Decodable {
         let name: String
-        let browser_download_url: String
+        let browserDownloadURL: String
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case browserDownloadURL = "browser_download_url"
+        }
     }
 }

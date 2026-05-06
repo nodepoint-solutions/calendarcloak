@@ -32,6 +32,10 @@ final class UpdateCheckerTests: XCTestCase {
         XCTAssertNil(parseSemver(""))
     }
 
+    func test_parseSemver_fourPartVersion_returnsNil() {
+        XCTAssertNil(parseSemver("1.2.3.4"))
+    }
+
     // MARK: isNewer
 
     func test_isNewer_majorBump_returnsTrue() {
@@ -56,5 +60,9 @@ final class UpdateCheckerTests: XCTestCase {
 
     func test_isNewer_olderMinor_returnsFalse() {
         XCTAssertFalse(isNewer((1, 1, 9), than: (1, 2, 0)))
+    }
+
+    func test_isNewer_olderPatch_returnsFalse() {
+        XCTAssertFalse(isNewer((1, 0, 0), than: (1, 0, 1)))
     }
 }
