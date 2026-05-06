@@ -22,6 +22,13 @@ final class AppCoordinator {
                 // all calendars from Settings after initial setup.
                 if settings.hasCompletedSetup && settings.selectedCalendarIDs.count >= 2 {
                     engine.start()
+                    Task.detached(priority: .background) {
+                        if let info = await checkForUpdate() {
+                            await MainActor.run {
+                                state.updateState = .available(version: info.version, dmgURL: info.dmgURL)
+                            }
+                        }
+                    }
                 } else {
                     settings.hasCompletedSetup = false  // reset so Activate re-sets it cleanly
                     openSetupWindow(store: eventKitStore, settings: settings, engine: engine)
