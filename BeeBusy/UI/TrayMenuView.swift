@@ -3,13 +3,6 @@ import SwiftUI
 struct TrayMenuView: View {
     @Environment(\.openSettings) private var openSettings
     let state: AppState
-    let settings: AppSettings
-    let eventKitStore: EventKitStore
-    let engine: SyncEngine
-    let logger: Logger
-
-    // Kept alive for the lifetime of the app so the window isn't deallocated
-    private static var setupWindowController: NSWindowController?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -23,60 +16,6 @@ struct TrayMenuView: View {
             }
             Divider()
             Button("Quit") { NSApplication.shared.terminate(nil) }
-        }
-        .task { await bootstrap() }
-    }
-
-    @MainActor
-    private func bootstrap() async {
-        do {
-            try await eventKitStore.requestAccess()
-            state.isAccessDenied = false
-            if settings.hasCompletedSetup {
-                engine.start()
-            } else {
-                openSetupWindow()
-            }
-        } catch {
-            state.isAccessDenied = true
-            logger.error("EventKit access denied: \(error)")
-            showAccessDeniedAlert()
-        }
-    }
-
-    @MainActor
-    private func openSetupWindow() {
-        let view = SetupWizardView(
-            store: eventKitStore,
-            settings: settings,
-            engine: engine,
-            onComplete: {
-                Self.setupWindowController?.close()
-                Self.setupWindowController = nil
-            }
-        )
-        let hosting = NSHostingController(rootView: view)
-        let window = NSWindow(contentViewController: hosting)
-        window.title = "Set Up Bee Busy"
-        window.styleMask = [.titled, .closable]
-        window.center()
-        let controller = NSWindowController(window: window)
-        Self.setupWindowController = controller
-        controller.showWindow(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-
-    private func showAccessDeniedAlert() {
-        let alert = NSAlert()
-        alert.messageText = "Calendar Access Required"
-        alert.informativeText = "Bee Busy needs full calendar access to sync Busy events. Please grant access in System Settings → Privacy & Security → Calendars."
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Quit")
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!)
-        } else {
-            NSApplication.shared.terminate(nil)
         }
     }
 
@@ -126,8 +65,7 @@ struct TrayMenuView: View {
     }
 
     private var statusLabel: String {
-        if state.isAccessDenied { return "Calendar access denied" }
-        return "Active"
+        state.isAccessDenied ? "Calendar access denied" : "Active"
     }
 
     private var lastSyncLabel: String {

@@ -13,22 +13,24 @@ struct BeeBusyApp: App {
     private let state = AppState()
     private let eventKitStore: EventKitStore
     private let engine: SyncEngine
+    private let coordinator = AppCoordinator()
 
     init() {
         let ekStore = EventKitStore(logger: logger)
         eventKitStore = ekStore
         engine = SyncEngine(store: ekStore, settings: settings, state: state, logger: logger)
+
+        // Bootstrap immediately on launch — not deferred to first tray click
+        let s = settings, st = state, ek = ekStore, e = engine, l = logger
+        let c = coordinator
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            c.bootstrap(settings: s, state: st, eventKitStore: ek, engine: e, logger: l)
+        }
     }
 
     var body: some Scene {
         MenuBarExtra("Bee Busy", systemImage: "calendar.badge.clock") {
-            TrayMenuView(
-                state: state,
-                settings: settings,
-                eventKitStore: eventKitStore,
-                engine: engine,
-                logger: logger
-            )
+            TrayMenuView(state: state)
         }
 
         Settings {
