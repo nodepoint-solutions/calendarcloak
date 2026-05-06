@@ -1,7 +1,8 @@
 import Foundation
 
 enum BusyEventMarker {
-    private static let prefix = "bee-busy:source="
+    private static let prefix = "calendarcloak:source="
+    private static let legacyPrefix = "bee-busy:source="
 
     static func notes(for sourceID: String) -> String {
         "\(prefix)\(sourceID)"
@@ -13,8 +14,11 @@ enum BusyEventMarker {
         return extracted.isEmpty ? nil : extracted
     }
 
-    /// Returns false if the event has no marker, or if notes were externally cleared after creation.
     static func isBusyEvent(_ event: CalendarEvent) -> Bool {
         sourceID(from: event.notes) != nil
+    }
+
+    static func isLegacyBusyEvent(_ event: CalendarEvent) -> Bool {
+        event.notes?.hasPrefix(legacyPrefix) == true
     }
 }

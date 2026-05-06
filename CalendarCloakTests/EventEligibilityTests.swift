@@ -20,7 +20,7 @@ final class EventEligibilityTests: XCTestCase {
     }
 
     func test_busyEventWithMarker_isNotEligible() {
-        let busyEvent = makeEvent(isAccepted: true, notes: "bee-busy:source=abc123")
+        let busyEvent = makeEvent(isAccepted: true, notes: "calendarcloak:source=abc123")
         XCTAssertFalse(EventEligibility.isEligible(busyEvent))
     }
 }
