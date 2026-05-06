@@ -198,9 +198,15 @@ struct SetupWizardView: View {
     }
 
     private func previewGroupSection(_ group: (calendarName: String, calendarID: String, drafts: [BusyEventDraft])) -> some View {
-        let shown = Array(group.drafts.prefix(10))
-        let overflow = group.drafts.count - shown.count
-        let targetNames = Set(shown.compactMap { draft in
+        // Deduplicate by sourceID — one source event creates N drafts (one per target calendar),
+        // but we only show it once. The target calendars are shown in the header.
+        let uniqueSourceIDs = group.drafts.reduce(into: [String]()) { result, draft in
+            if !result.contains(draft.sourceID) { result.append(draft.sourceID) }
+        }
+        let shown = Array(uniqueSourceIDs.prefix(10))
+        let overflow = uniqueSourceIDs.count - shown.count
+
+        let targetNames = Set(group.drafts.compactMap { draft in
             dryRunEvents.first(where: { $0.calendarID == draft.calendarID })?.calendarName
         }).sorted().joined(separator: ", ")
 
@@ -217,14 +223,18 @@ struct SetupWizardView: View {
             }
 
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(shown.enumerated()), id: \.offset) { index, draft in
+                ForEach(Array(shown.enumerated()), id: \.offset) { index, sourceID in
+                    let event = dryRunEvents.first(where: { $0.id == sourceID })
+                    let draft = group.drafts.first(where: { $0.sourceID == sourceID })
                     HStack {
-                        Text(dryRunEvents.first(where: { $0.id == draft.sourceID })?.title ?? "Event")
+                        Text(event?.title ?? "Event")
                             .font(.body)
                         Spacer()
-                        Text(formatRange(start: draft.startDate, end: draft.endDate, isAllDay: draft.isAllDay))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        if let draft {
+                            Text(formatRange(start: draft.startDate, end: draft.endDate, isAllDay: draft.isAllDay))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
@@ -302,7 +312,10 @@ struct SetupWizardView: View {
     }
 
     private var totalCreates: Int {
-        dryRunOperations.filter { if case .create = $0 { return true }; return false }.count
+        Set(dryRunOperations.compactMap { op -> String? in
+            if case .create(let draft) = op { return draft.sourceID }
+            return nil
+        }).count
     }
 
     private func formatRange(start: Date, end: Date, isAllDay: Bool) -> String {
