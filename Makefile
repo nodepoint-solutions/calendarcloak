@@ -16,15 +16,16 @@ BUILD_FLAGS := \
 .PHONY: build run test clean
 
 build:
-	$(XCODEBUILD) build $(BUILD_FLAGS) \
-		2>&1 | grep -E '^(.*error:|.*warning:|Build succeeded|BUILD SUCCEEDED|BUILD FAILED)'
+	$(XCODEBUILD) build $(BUILD_FLAGS) 2>&1 | tee /tmp/xcodebuild.log | \
+		grep -E '(error:|warning:|BUILD SUCCEEDED|BUILD FAILED)' || true
+	@grep -q 'BUILD SUCCEEDED' /tmp/xcodebuild.log
 
 run: build
 	open $(DERIVED)/Build/Products/Debug/BeeBusy.app
 
 test:
-	$(XCODEBUILD) test $(BUILD_FLAGS) \
-		2>&1 | grep -E '(Test Suite|Test Case|error:|FAILED|passed|failed)'
+	$(XCODEBUILD) test $(BUILD_FLAGS) 2>&1 | \
+		grep -E '(Test Suite|Test Case|error:|FAILED|passed|failed)' || true
 
 clean:
 	rm -rf .build/
