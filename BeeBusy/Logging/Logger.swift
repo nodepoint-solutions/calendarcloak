@@ -17,6 +17,7 @@ final class Logger {
         )
     }
 
+    func debug(_ message: String) { write(level: "DEBUG", message: message) }
     func info(_ message: String) { write(level: "INFO", message: message) }
     func warn(_ message: String) { write(level: "WARN", message: message) }
     func error(_ message: String) { write(level: "ERROR", message: message) }

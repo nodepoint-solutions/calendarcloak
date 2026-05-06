@@ -4,7 +4,8 @@ func reconcile(
     eligibleSources: [CalendarEvent],
     busyEvents: [CalendarEvent],
     configuredCalendarIDs: [String],
-    windowEnd: Date = .distantFuture
+    windowEnd: Date = .distantFuture,
+    logger: Logger? = nil
 ) -> [ReconciliationOperation] {
     var ops: [ReconciliationOperation] = []
 
@@ -36,7 +37,18 @@ func reconcile(
     for busy in busyEvents {
         guard let sid = BusyEventMarker.sourceID(from: busy.notes) else { continue }
         if busy.isRecurring {
-            seriesBusy[sid, default: [:]][busy.calendarID, default: []].append(busy)
+            // store.events(matching:) returns one EKEvent per occurrence; all occurrences of the same
+            // series share the same calendarItemIdentifier. Deduplicate by id, keeping the earliest
+            // occurrence so the startDate comparison in reconciliation matches the source anchor.
+            var calMap = seriesBusy[sid, default: [:]]
+            var seriesList = calMap[busy.calendarID, default: []]
+            if let idx = seriesList.firstIndex(where: { $0.id == busy.id }) {
+                if busy.startDate < seriesList[idx].startDate { seriesList[idx] = busy }
+            } else {
+                seriesList.append(busy)
+            }
+            calMap[busy.calendarID] = seriesList
+            seriesBusy[sid] = calMap
         } else {
             individualBusy[sid, default: []].append(busy)
         }
@@ -90,6 +102,7 @@ func reconcile(
 
             if existingList.count > 1 {
                 // Multiple busy series accumulated from incomplete prior deletions — purge all and recreate clean
+                logger?.debug("series \(seriesID.prefix(8)) cal=\(calID.prefix(8)): count=\(existingList.count) ids=\(existingList.map { $0.id.prefix(8) }.joined(separator: ",")) — purge+recreate")
                 existingList.forEach { ops.append(.delete($0)) }
                 ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
                                                   endDate: anchor.endDate, isAllDay: anchor.isAllDay,
@@ -98,10 +111,13 @@ func reconcile(
                 let timingChanged = existingBusy.startDate != anchor.startDate
                     || existingBusy.endDate != anchor.endDate
                     || existingBusy.isAllDay != anchor.isAllDay
-                // Cap is stale when the Busy series ends before the current window end,
-                // meaning new occurrences have appeared that aren't yet covered.
-                let capStale = (existingBusy.seriesEndDate ?? .distantPast) < windowEnd
+                // Cap is stale when the Busy series ends before the effective cap — the
+                // lesser of the source's own end and windowEnd. Using raw windowEnd would
+                // always fire as stale when the source ends before the window.
+                let effectiveCap = anchor.seriesEndDate.map { min($0, windowEnd) } ?? windowEnd
+                let capStale = (existingBusy.seriesEndDate ?? .distantPast) < effectiveCap
                 if timingChanged || capStale {
+                    logger?.debug("series \(seriesID.prefix(8)) cal=\(calID.prefix(8)): timingChanged=\(timingChanged) capStale=\(capStale) seriesEnd=\(existingBusy.seriesEndDate?.description ?? "nil") windowEnd=\(windowEnd) anchorStart=\(anchor.startDate) busyStart=\(existingBusy.startDate) anchorEnd=\(anchor.endDate) busyEnd=\(existingBusy.endDate)")
                     ops.append(.delete(existingBusy))
                     ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
                                                       endDate: anchor.endDate, isAllDay: anchor.isAllDay,

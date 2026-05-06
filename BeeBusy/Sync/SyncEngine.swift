@@ -98,7 +98,8 @@ final class SyncEngine {
         let (sources, busy) = partition(allEvents)
         let eligible = sources.filter { EventEligibility.isEligible($0) }
         let operations = reconcile(eligibleSources: eligible, busyEvents: busy,
-                                   configuredCalendarIDs: calendarIDs, windowEnd: window.end)
+                                   configuredCalendarIDs: calendarIDs, windowEnd: window.end,
+                                   logger: logger)
 
         logger.info("Plan: \(operations.count) operations")
         for op in operations {
@@ -136,7 +137,11 @@ final class SyncEngine {
 
     private func lookForwardWindow() -> (start: Date, end: Date) {
         let start = Calendar.current.startOfDay(for: Date())
-        let end = Calendar.current.date(byAdding: .day, value: settings.lookForwardDays, to: start)!
+        let localEnd = Calendar.current.date(byAdding: .day, value: settings.lookForwardDays, to: start)!
+        // EKKit normalises EKRecurrenceEnd(end:) to midnight UTC. Round localEnd up to the next
+        // UTC midnight so the stored value roundtrips exactly and capStale never fires spuriously.
+        let secondsPerDay: TimeInterval = 86400
+        let end = Date(timeIntervalSince1970: ceil(localEnd.timeIntervalSince1970 / secondsPerDay) * secondsPerDay)
         return (start, end)
     }
 }

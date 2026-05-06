@@ -113,6 +113,43 @@ final class ReconciliationTests: XCTestCase {
         XCTAssertTrue(creates.allSatisfy { $0.startDate == now })  // anchor = earliest occurrence
     }
 
+    func test_recurringSeries_noOpWithMultipleOccurrencesInWindow() {
+        // Regression: store.events(matching:) returns one EKEvent per occurrence (all same id).
+        // Multiple occurrences of a single Busy series must NOT trigger the "duplicate series" purge path.
+        let seriesID = UUID().uuidString
+        let occ1 = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
+        let occ2 = recurringSource(id: "series1", cal: calA,
+                                   start: now.addingTimeInterval(7 * 86400),
+                                   end: now.addingTimeInterval(7 * 86400 + 3600))
+        let occ3 = recurringSource(id: "series1", cal: calA,
+                                   start: now.addingTimeInterval(14 * 86400),
+                                   end: now.addingTimeInterval(14 * 86400 + 3600))
+        // Three occurrences of the SAME Busy series (same id, different startDates)
+        let busyOcc1 = CalendarEvent(id: seriesID, calendarID: calB, calendarName: calB,
+                                     title: "Busy", startDate: now, endDate: now.addingTimeInterval(3600),
+                                     isAllDay: false, notes: BusyEventMarker.notes(for: "series1"),
+                                     isAccepted: true, isRecurring: true, isDetached: false,
+                                     seriesEndDate: windowEnd)
+        let busyOcc2 = CalendarEvent(id: seriesID, calendarID: calB, calendarName: calB,
+                                     title: "Busy",
+                                     startDate: now.addingTimeInterval(7 * 86400),
+                                     endDate: now.addingTimeInterval(7 * 86400 + 3600),
+                                     isAllDay: false, notes: BusyEventMarker.notes(for: "series1"),
+                                     isAccepted: true, isRecurring: true, isDetached: false,
+                                     seriesEndDate: windowEnd)
+        let busyOcc3 = CalendarEvent(id: seriesID, calendarID: calB, calendarName: calB,
+                                     title: "Busy",
+                                     startDate: now.addingTimeInterval(14 * 86400),
+                                     endDate: now.addingTimeInterval(14 * 86400 + 3600),
+                                     isAllDay: false, notes: BusyEventMarker.notes(for: "series1"),
+                                     isAccepted: true, isRecurring: true, isDetached: false,
+                                     seriesEndDate: windowEnd)
+        let ops = reconcile(eligibleSources: [occ1, occ2, occ3],
+                            busyEvents: [busyOcc1, busyOcc2, busyOcc3],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        XCTAssertEqual(ops.count, 0, "multiple occurrences of a single Busy series must be a no-op")
+    }
+
     func test_recurringSeries_noOpWhenBusySeriesUpToDate() {
         let src = recurringSource(id: "series1", cal: calA, start: now, end: now.addingTimeInterval(3600))
         let existingB = recurringBusy(sourceID: "series1", cal: calB, start: now,
@@ -122,6 +159,22 @@ final class ReconciliationTests: XCTestCase {
         let ops = reconcile(eligibleSources: [src], busyEvents: [existingB, existingC],
                             configuredCalendarIDs: [calA, calB, calC], windowEnd: windowEnd)
         XCTAssertEqual(ops.count, 0)
+    }
+
+    func test_recurringSeries_noOpWhenSourceEndsBeforeWindow() {
+        // Regression: source series has its own end date that falls before windowEnd.
+        // cappedRule picks min(sourceEnd, windowEnd), so the Busy series ends at sourceEnd.
+        // capStale must not fire just because sourceEnd < windowEnd — the Busy series can't
+        // extend further than the source itself.
+        let sourceEnd = now.addingTimeInterval(9 * 86400)   // source ends in 9 days
+        let src = recurringSource(id: "series1", cal: calA, start: now,
+                                  end: now.addingTimeInterval(3600), seriesEndDate: sourceEnd)
+        // Busy series is correctly capped at sourceEnd (= min(sourceEnd, 30-day windowEnd))
+        let existingB = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                      end: now.addingTimeInterval(3600), seriesEndDate: sourceEnd)
+        let ops = reconcile(eligibleSources: [src], busyEvents: [existingB],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        XCTAssertEqual(ops.count, 0, "source ends before window — Busy cap is already correct, must not recreate")
     }
 
     func test_recurringSeries_recreatesWhenCapIsStale() {
