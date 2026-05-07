@@ -48,6 +48,7 @@ jobs:
       - name: Ad-hoc codesign
         run: |
           codesign --sign - --deep --force --options runtime \
+            --entitlements CalendarCloak/CalendarCloak.entitlements \
             build/export-arm64/CalendarCloak.app
 
       - name: Package as DMG

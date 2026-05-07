@@ -1,5 +1,4 @@
 import SwiftUI
-import EventKit
 
 /// Owns app-level lifecycle: EventKit access, first-launch setup window, engine start.
 /// Lives outside the SwiftUI view hierarchy so it runs on app launch, not on first tray click.
@@ -18,7 +17,6 @@ final class AppCoordinator {
             do {
                 try await eventKitStore.requestAccess()
                 state.isAccessDenied = false
-                logger.info("requestAccess completed. auth=\(EKEventStore.authorizationStatus(for: .event).rawValue) hasCompletedSetup=\(settings.hasCompletedSetup) calendarCount=\(settings.selectedCalendarIDs.count)")
                 // Treat fewer than 2 calendars as unconfigured regardless of hasCompletedSetup —
                 // covers the case where the user closed the wizard without finishing, or removed
                 // all calendars from Settings after initial setup.
