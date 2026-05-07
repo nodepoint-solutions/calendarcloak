@@ -86,8 +86,8 @@ final class EventKitStore: CalendarStoreProtocol {
     }
 
     func delete(_ event: CalendarEvent) {
-        // SAFETY GUARD: abort if this is not one of our managed Busy events
-        guard BusyEventMarker.sourceID(from: event.notes) != nil else {
+        // SAFETY GUARD: abort if this is not one of our managed Busy events (either prefix)
+        guard BusyEventMarker.isBusyEvent(event) || BusyEventMarker.isLegacyBusyEvent(event) else {
             logger.error("SAFETY: attempted to delete non-managed event \(event.id) — aborted")
             return
         }
@@ -125,13 +125,12 @@ final class EventKitStore: CalendarStoreProtocol {
     }
 
     private func cappedRule(_ rule: EKRecurrenceRule, cap: Date) -> EKRecurrenceRule {
-        // Honour the source series' own end date if it falls before our window cap.
-        let effectiveCap: Date
-        if let sourceEnd = rule.recurrenceEnd?.endDate {
-            effectiveCap = min(sourceEnd, cap)
-        } else {
-            effectiveCap = cap
-        }
+        // cap is already min(anchor.seriesEndDate, windowEnd) — computed by Reconciliation using
+        // the anchor occurrence's seriesEndDate. Do NOT re-apply min() with
+        // rule.recurrenceEnd?.endDate here: for CalDAV / Google Calendar events, intermediate
+        // occurrences carry a synthetic recurrenceEnd matching that occurrence's date, which
+        // is unrelated to the true series end and would permanently under-cap the Busy series,
+        // causing capStale to fire on every reconciliation cycle.
         return EKRecurrenceRule(
             recurrenceWith: rule.frequency,
             interval: rule.interval,
@@ -141,7 +140,7 @@ final class EventKitStore: CalendarStoreProtocol {
             weeksOfTheYear: rule.weeksOfTheYear,
             daysOfTheYear: rule.daysOfTheYear,
             setPositions: rule.setPositions,
-            end: EKRecurrenceEnd(end: effectiveCap)
+            end: EKRecurrenceEnd(end: cap)
         )
     }
 }

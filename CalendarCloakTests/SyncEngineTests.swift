@@ -24,7 +24,7 @@ final class SyncEngineTests: XCTestCase {
                       isAllDay: false, notes: nil, isAccepted: true)
     }
 
-    func test_deleteAllBusyEvents_deletesBusyEventsAcrossAllCalendars() {
+    func test_deleteAllBusyEventsAndReset_deletesBusyEventsAcrossAllCalendars() {
         let store = MockCalendarStore()
         store.stubbedCalendarIDs = ["calA", "calB"]
         store.stubbedEvents = [
@@ -33,14 +33,14 @@ final class SyncEngineTests: XCTestCase {
         ]
         let engine = makeEngine(store: store)
 
-        engine.deleteAllBusyEvents()
+        engine.deleteAllBusyEventsAndReset()
 
         XCTAssertEqual(store.deletedEvents.count, 2)
         XCTAssertTrue(store.deletedEvents.contains { $0.id == "b1" })
         XCTAssertTrue(store.deletedEvents.contains { $0.id == "b2" })
     }
 
-    func test_deleteAllBusyEvents_doesNotDeleteSourceEvents() {
+    func test_deleteAllBusyEventsAndReset_doesNotDeleteSourceEvents() {
         let store = MockCalendarStore()
         store.stubbedCalendarIDs = ["calA"]
         store.stubbedEvents = [
@@ -49,31 +49,31 @@ final class SyncEngineTests: XCTestCase {
         ]
         let engine = makeEngine(store: store)
 
-        engine.deleteAllBusyEvents()
+        engine.deleteAllBusyEventsAndReset()
 
         XCTAssertEqual(store.deletedEvents.count, 1)
         XCTAssertEqual(store.deletedEvents.first?.id, "b1")
     }
 
-    func test_deleteAllBusyEvents_noEventsIsNoop() {
+    func test_deleteAllBusyEventsAndReset_noEventsIsNoop() {
         let store = MockCalendarStore()
         store.stubbedCalendarIDs = ["calA"]
         store.stubbedEvents = []
         let engine = makeEngine(store: store)
 
-        engine.deleteAllBusyEvents()
+        engine.deleteAllBusyEventsAndReset()
 
         XCTAssertTrue(store.deletedEvents.isEmpty)
-        XCTAssertEqual(store.fetchEventsCallCount, 1, "fetchEvents should be called even when result is empty")
+        XCTAssertEqual(store.fetchEventsCallCount, 2, "fetchEvents should be called twice (past + future chunks) even when result is empty")
     }
 
-    func test_deleteAllBusyEvents_noCalendarsIsNoop() {
+    func test_deleteAllBusyEventsAndReset_noCalendarsIsNoop() {
         let store = MockCalendarStore()
         store.stubbedCalendarIDs = []
         store.stubbedEvents = [busyEvent(id: "b1", calendarID: "calA")]
         let engine = makeEngine(store: store)
 
-        engine.deleteAllBusyEvents()
+        engine.deleteAllBusyEventsAndReset()
 
         XCTAssertTrue(store.deletedEvents.isEmpty)
         XCTAssertEqual(store.fetchEventsCallCount, 0, "guard should prevent fetchEvents from being called")

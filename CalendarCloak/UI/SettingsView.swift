@@ -9,6 +9,7 @@ struct SettingsView: View {
     let store: CalendarStoreProtocol
     let logger: Logger
     let engine: SyncEngine
+    let onFactoryReset: () -> Void
 
     private var calendarsBySource: [(sourceTitle: String, calendars: [EKCalendar])] {
         let grouped = Dictionary(grouping: calendars) { $0.source?.title ?? "Other" }
@@ -137,12 +138,13 @@ struct SettingsView: View {
             isPresented: $showingCleanupConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Delete", role: .destructive) {
-                engine.deleteAllBusyEvents()
+            Button("Delete & Reset", role: .destructive) {
+                engine.deleteAllBusyEventsAndReset()
+                onFactoryReset()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will remove all Busy events from all calendars. If syncing is active, they will be recreated on the next sync.")
+            Text("This will remove all Busy events from all calendars and stop syncing. You'll be taken back to setup to re-configure.")
         }
     }
 

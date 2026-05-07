@@ -41,24 +41,53 @@ final class SyncEngine {
         logger.info("Removed \(busyToDelete.count) Busy events from \(calendarID)")
     }
 
-    func deleteAllBusyEvents() {
+    func deleteAllBusyEventsAndReset() {
+        // Stop the engine first so EKEventStoreChanged notifications fired during deletion
+        // don't reschedule reconciliation and recreate events mid-sweep.
+        stop()
+        settings.selectedCalendarIDs = []
+        settings.hasCompletedSetup = false
+        state.lastSyncDate = nil
+        state.activeCalendarNames = []
+
         let calendarIDs = store.fetchAllCalendarIDs()
-        guard !calendarIDs.isEmpty else { return }
-        // Intentionally wider than the look-forward window: a full sweep ensures past Busy events
-        // (created when they were future, now aged out of the normal window) are also removed.
-        let events = store.fetchEvents(calendarIDs: calendarIDs, start: .distantPast, end: .distantFuture)
-        let busyToDelete = events.filter { BusyEventMarker.isBusyEvent($0) }
+        guard !calendarIDs.isEmpty else {
+            logger.info("No calendars found during factory reset sweep")
+            return
+        }
+
+        // .distantPast / .distantFuture cause EventKit's predicate to return empty results.
+        // EventKit enforces a ~4-year maximum span per predicate, so sweep in two chunks.
+        // Deduplicate by ID in case an event falls exactly on the boundary.
+        let now = Date()
+        let pastStart  = Calendar.current.date(byAdding: .year, value: -4, to: now)!
+        let futureEnd  = Calendar.current.date(byAdding: .year, value:  4, to: now)!
+        let pastEvents   = store.fetchEvents(calendarIDs: calendarIDs, start: pastStart, end: now)
+        let futureEvents = store.fetchEvents(calendarIDs: calendarIDs, start: now, end: futureEnd)
+
+        var seenIDs = Set<String>()
+        let busyToDelete = (pastEvents + futureEvents).filter { event in
+            (BusyEventMarker.isBusyEvent(event) || BusyEventMarker.isLegacyBusyEvent(event))
+                && seenIDs.insert(event.id).inserted
+        }
         for event in busyToDelete {
             store.delete(event)
         }
-        logger.info("Deleted \(busyToDelete.count) Busy events across all calendars")
+        logger.info("Factory reset: deleted \(busyToDelete.count) Busy events across all calendars")
     }
 
     func deleteLegacyBusyEvents() {
         let calendarIDs = store.fetchAllCalendarIDs()
         guard !calendarIDs.isEmpty else { return }
-        let events = store.fetchEvents(calendarIDs: calendarIDs, start: .distantPast, end: .distantFuture)
-        let legacy = events.filter { BusyEventMarker.isLegacyBusyEvent($0) }
+        let now = Date()
+        let pastStart  = Calendar.current.date(byAdding: .year, value: -4, to: now)!
+        let futureEnd  = Calendar.current.date(byAdding: .year, value:  4, to: now)!
+        let pastEvents   = store.fetchEvents(calendarIDs: calendarIDs, start: pastStart, end: now)
+        let futureEvents = store.fetchEvents(calendarIDs: calendarIDs, start: now, end: futureEnd)
+        var seenIDs = Set<String>()
+        let legacy = (pastEvents + futureEvents).filter { event in
+            BusyEventMarker.isLegacyBusyEvent(event) && seenIDs.insert(event.id).inserted
+        }
         for event in legacy {
             store.delete(event)
         }

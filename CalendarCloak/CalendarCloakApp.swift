@@ -38,7 +38,12 @@ struct CalendarCloakApp: App {
                 settings: settings,
                 store: eventKitStore,
                 logger: logger,
-                engine: engine
+                engine: engine,
+                onFactoryReset: {
+                    // Close Settings before opening the wizard so they don't stack.
+                    NSApp.windows.first { $0.title == "CalendarCloak Settings" }?.close()
+                    coordinator.openSetupWindow(store: eventKitStore, settings: settings, engine: engine)
+                }
             )
         }
     }
