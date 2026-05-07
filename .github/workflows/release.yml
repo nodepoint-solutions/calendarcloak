@@ -25,25 +25,12 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Generate Xcode project
-        run: xcodegen generate
-
       - name: Extract version from tag
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
       - name: Build archive
-        run: |
-          xcodebuild archive \
-            -project CalendarCloak.xcodeproj \
-            -scheme CalendarCloak \
-            -configuration Release \
-            -archivePath build/CalendarCloak-arm64.xcarchive \
-            ARCHS=arm64 \
-            ONLY_ACTIVE_ARCH=NO \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+        run: make archive
 
       - name: Export app
         run: |

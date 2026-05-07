@@ -13,10 +13,22 @@ BUILD_FLAGS := \
 	CODE_SIGN_IDENTITY="" \
 	CODE_SIGNING_REQUIRED=NO
 
-.PHONY: build run test clean generate
+.PHONY: build run test clean generate archive
 
 generate:
 	xcodegen generate
+
+archive: generate
+	$(XCODEBUILD) archive \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-configuration Release \
+		-archivePath build/CalendarCloak-arm64.xcarchive \
+		ARCHS=arm64 \
+		ONLY_ACTIVE_ARCH=NO \
+		CODE_SIGN_IDENTITY="" \
+		CODE_SIGNING_REQUIRED=NO \
+		CODE_SIGNING_ALLOWED=NO
 
 build: generate
 	$(XCODEBUILD) build $(BUILD_FLAGS) 2>&1 | tee /tmp/xcodebuild.log | \
