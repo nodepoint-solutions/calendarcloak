@@ -96,6 +96,9 @@ func reconcile(
 
     for (seriesID, anchor) in seriesAnchors {
         let targetCalIDs = configuredCalendarIDs.filter { $0 != anchor.calendarID }
+        // Cap the Busy series at the lesser of the source's own end date and the window end.
+        // Without this, a source series ending May 15 would produce Busy events through June.
+        let effectiveCap = anchor.seriesEndDate.map { min($0, windowEnd) } ?? windowEnd
 
         for calID in targetCalIDs {
             let existingList = seriesBusy[seriesID]?[calID] ?? []
@@ -106,27 +109,27 @@ func reconcile(
                 existingList.forEach { ops.append(.delete($0)) }
                 ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
                                                   endDate: anchor.endDate, isAllDay: anchor.isAllDay,
-                                                  sourceID: seriesID, recurrenceCapDate: windowEnd)))
+                                                  sourceID: seriesID, recurrenceCapDate: effectiveCap)))
             } else if let existingBusy = existingList.first {
                 let timingChanged = existingBusy.startDate != anchor.startDate
                     || existingBusy.endDate != anchor.endDate
                     || existingBusy.isAllDay != anchor.isAllDay
-                // Cap is stale when the Busy series ends before the effective cap — the
-                // lesser of the source's own end and windowEnd. Using raw windowEnd would
-                // always fire as stale when the source ends before the window.
-                let effectiveCap = anchor.seriesEndDate.map { min($0, windowEnd) } ?? windowEnd
                 let capStale = (existingBusy.seriesEndDate ?? .distantPast) < effectiveCap
-                if timingChanged || capStale {
-                    logger?.debug("series \(seriesID.prefix(8)) cal=\(calID.prefix(8)): timingChanged=\(timingChanged) capStale=\(capStale) seriesEnd=\(existingBusy.seriesEndDate?.description ?? "nil") windowEnd=\(windowEnd) anchorStart=\(anchor.startDate) busyStart=\(existingBusy.startDate) anchorEnd=\(anchor.endDate) busyEnd=\(existingBusy.endDate)")
+                // Also catch over-extension: Busy extends past the source's own end date (created by old bug).
+                // Only checked when the source has a finite end — indefinite sources use windowEnd which
+                // shifts each day, so inequality there is expected and handled by capStale alone.
+                let capOver = anchor.seriesEndDate.map { (existingBusy.seriesEndDate ?? .distantFuture) > $0 } ?? false
+                if timingChanged || capStale || capOver {
+                    logger?.debug("series \(seriesID.prefix(8)) cal=\(calID.prefix(8)): timingChanged=\(timingChanged) capStale=\(capStale) capOver=\(capOver) seriesEnd=\(existingBusy.seriesEndDate?.description ?? "nil") effectiveCap=\(effectiveCap) anchorStart=\(anchor.startDate) busyStart=\(existingBusy.startDate) anchorEnd=\(anchor.endDate) busyEnd=\(existingBusy.endDate)")
                     ops.append(.delete(existingBusy))
                     ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
                                                       endDate: anchor.endDate, isAllDay: anchor.isAllDay,
-                                                      sourceID: seriesID, recurrenceCapDate: windowEnd)))
+                                                      sourceID: seriesID, recurrenceCapDate: effectiveCap)))
                 }
             } else {
                 ops.append(.create(BusyEventDraft(calendarID: calID, startDate: anchor.startDate,
                                                   endDate: anchor.endDate, isAllDay: anchor.isAllDay,
-                                                  sourceID: seriesID, recurrenceCapDate: windowEnd)))
+                                                  sourceID: seriesID, recurrenceCapDate: effectiveCap)))
             }
         }
 

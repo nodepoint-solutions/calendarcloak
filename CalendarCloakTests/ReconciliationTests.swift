@@ -161,6 +161,23 @@ final class ReconciliationTests: XCTestCase {
         XCTAssertEqual(ops.count, 0)
     }
 
+    func test_recurringSeries_recreatesWhenBusyOverextendsPastSourceEnd() {
+        // Existing Busy was created with the old bug: capped to windowEnd instead of sourceEnd.
+        // Reconciliation must detect the over-extension and recreate with the correct cap.
+        let sourceEnd = now.addingTimeInterval(9 * 86400)
+        let src = recurringSource(id: "series1", cal: calA, start: now,
+                                  end: now.addingTimeInterval(3600), seriesEndDate: sourceEnd)
+        // Buggy existing Busy: capped to windowEnd (30 days) instead of sourceEnd (9 days)
+        let overextended = recurringBusy(sourceID: "series1", cal: calB, start: now,
+                                         end: now.addingTimeInterval(3600), seriesEndDate: windowEnd)
+        let ops = reconcile(eligibleSources: [src], busyEvents: [overextended],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        XCTAssertTrue(ops.contains(.delete(overextended)), "must delete over-extended Busy series")
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        XCTAssertEqual(creates.first?.recurrenceCapDate, sourceEnd,
+                       "recreated Busy must be capped to source end date, not window end")
+    }
+
     func test_recurringSeries_noOpWhenSourceEndsBeforeWindow() {
         // Regression: source series has its own end date that falls before windowEnd.
         // cappedRule picks min(sourceEnd, windowEnd), so the Busy series ends at sourceEnd.
@@ -175,6 +192,19 @@ final class ReconciliationTests: XCTestCase {
         let ops = reconcile(eligibleSources: [src], busyEvents: [existingB],
                             configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
         XCTAssertEqual(ops.count, 0, "source ends before window — Busy cap is already correct, must not recreate")
+    }
+
+    func test_recurringSeries_newSeries_capsToSourceEndWhenSourceEndsBeforeWindow() {
+        // Source ends in 9 days; window is 30 days. Busy must be capped to sourceEnd, not windowEnd.
+        let sourceEnd = now.addingTimeInterval(9 * 86400)
+        let src = recurringSource(id: "series1", cal: calA, start: now,
+                                  end: now.addingTimeInterval(3600), seriesEndDate: sourceEnd)
+        let ops = reconcile(eligibleSources: [src], busyEvents: [],
+                            configuredCalendarIDs: [calA, calB], windowEnd: windowEnd)
+        let creates = ops.compactMap { if case .create(let d) = $0 { return d } else { return nil } }
+        XCTAssertEqual(creates.count, 1)
+        XCTAssertEqual(creates.first?.recurrenceCapDate, sourceEnd,
+                       "Busy series cap must be the source series end date, not the window end")
     }
 
     func test_recurringSeries_recreatesWhenCapIsStale() {
