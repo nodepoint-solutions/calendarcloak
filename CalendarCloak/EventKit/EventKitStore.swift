@@ -26,7 +26,10 @@ final class EventKitStore: CalendarStoreProtocol {
     }
 
     func fetchCalendars() -> [EKCalendar] {
-        store.calendars(for: .event).filter { $0.allowsContentModifications }
+        let all = store.calendars(for: .event)
+        let writable = all.filter { $0.allowsContentModifications }
+        logger.info("fetchCalendars: auth=\(EKEventStore.authorizationStatus(for: .event).rawValue) total=\(all.count) writable=\(writable.count)")
+        return writable
     }
 
     func fetchAllCalendarIDs() -> [String] {
