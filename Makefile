@@ -28,7 +28,8 @@ archive: generate
 		ONLY_ACTIVE_ARCH=NO \
 		CODE_SIGN_IDENTITY="" \
 		CODE_SIGNING_REQUIRED=NO \
-		CODE_SIGNING_ALLOWED=NO
+		CODE_SIGNING_ALLOWED=NO \
+		$(if $(VERSION),MARKETING_VERSION=$(VERSION))
 
 build: generate
 	$(XCODEBUILD) build $(BUILD_FLAGS) 2>&1 | tee /tmp/xcodebuild.log | \
