@@ -37,9 +37,11 @@ struct SetupWizardView: View {
         HStack(spacing: 16) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.yellow.opacity(0.15))
+                    .fill(Color.accentColor.opacity(0.15))
                     .frame(width: 48, height: 48)
-                Text("🐝").font(.system(size: 26))
+                Image(systemName: "calendar.badge.clock")
+                    .font(.system(size: 26))
+                    .foregroundStyle(Color.accentColor)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text("CalendarCloak").font(.title2).bold()
