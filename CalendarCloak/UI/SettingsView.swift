@@ -129,6 +129,9 @@ struct SettingsView: View {
         .frame(minWidth: 360)
         .padding()
         .onAppear { calendars = store.fetchCalendars() }
+        .onReceive(NotificationCenter.default.publisher(for: .EKEventStoreChanged)) { _ in
+            calendars = store.fetchCalendars()
+        }
         .confirmationDialog(
             "Delete All Busy Events?",
             isPresented: $showingCleanupConfirmation,

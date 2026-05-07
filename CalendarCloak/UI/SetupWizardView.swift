@@ -26,6 +26,9 @@ struct SetupWizardView: View {
         }
         .frame(width: 820)
         .onAppear { allCalendars = store.fetchCalendars() }
+        .onReceive(NotificationCenter.default.publisher(for: .EKEventStoreChanged)) { _ in
+            allCalendars = store.fetchCalendars()
+        }
     }
 
     // MARK: - Header
